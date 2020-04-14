@@ -7,10 +7,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -24,6 +26,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private EditText email,password;
     private Button mRegister;
+    private TextView existaccount;
     private ProgressDialog progressDialog;
     private FirebaseAuth mAuth;
     @Override
@@ -37,6 +40,7 @@ public class RegisterActivity extends AppCompatActivity {
         email=findViewById(R.id.emailEt);
         password=findViewById(R.id.passwordEt);
         mRegister=findViewById(R.id.regsiterbtnac);
+        existaccount=findViewById(R.id.alredyhaveaaccount);
         mAuth=FirebaseAuth.getInstance();
         progressDialog=new ProgressDialog(this);
         progressDialog.setMessage("Register");
@@ -60,6 +64,13 @@ public class RegisterActivity extends AppCompatActivity {
 
             }
         });
+        existaccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+
+            }
+        });
 
     }
 
@@ -73,6 +84,7 @@ public class RegisterActivity extends AppCompatActivity {
                     FirebaseUser user=mAuth.getCurrentUser();
                     Toast.makeText(RegisterActivity.this,"Registered User " +user.getEmail(),Toast.LENGTH_LONG).show();
                     Intent mainIntent=new Intent(RegisterActivity.this,ProfileActivity.class);
+                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(mainIntent);
                     finish();
                 }

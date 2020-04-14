@@ -54,4 +54,13 @@
         android:id="@+id/regsiterbtnac"
        />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:text="Already Have A Account?Login"
+        android:id="@+id/alredyhaveaaccount"
+        android:layout_below="@id/regsiterbtnac"
+        android:textColor="@color/colorBlack"/>
 </RelativeLayout>
