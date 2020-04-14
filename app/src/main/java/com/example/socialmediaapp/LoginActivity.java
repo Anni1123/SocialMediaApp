@@ -81,7 +81,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     else {
                         String message=task.getException().toString();
-                        Toast.makeText(LoginActivity.this,"Error Found:"+message,Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this,"Error Found Here:"+message,Toast.LENGTH_LONG).show();
                         loadingBar.dismiss();
                     }
                 }
