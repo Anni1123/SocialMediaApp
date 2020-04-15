@@ -74,13 +74,14 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    private void registerUser(String emaill, String pass) {
+    private void registerUser(String emaill, final String pass) {
 
         progressDialog.show();
         mAuth.createUserWithEmailAndPassword(emaill, pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()){
+                    progressDialog.dismiss();
                     FirebaseUser user=mAuth.getCurrentUser();
                     Toast.makeText(RegisterActivity.this,"Registered User " +user.getEmail(),Toast.LENGTH_LONG).show();
                     Intent mainIntent=new Intent(RegisterActivity.this,ProfileActivity.class);
@@ -89,6 +90,7 @@ public class RegisterActivity extends AppCompatActivity {
                     finish();
                 }
                 else {
+                    progressDialog.dismiss();
                     Toast.makeText(RegisterActivity.this,"Error",Toast.LENGTH_LONG).show();
                 }
             }

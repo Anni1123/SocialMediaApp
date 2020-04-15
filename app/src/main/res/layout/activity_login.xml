@@ -47,9 +47,19 @@
         android:layout_centerHorizontal="true"
         android:layout_below="@id/passwordlog"
         android:layout_marginTop="20dp"
+        android:drawableStart=""
         android:layout_height="wrap_content"
         style="@style/Base.Widget.AppCompat.Button.Colored"
         android:text="Login"
         android:id="@+id/loginac"
         />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:text="Create A Account?Reg"
+        android:id="@+id/createhaveaaccount"
+        android:layout_below="@id/loginac"
+        android:textColor="@color/colorBlack"/>
 </RelativeLayout>
