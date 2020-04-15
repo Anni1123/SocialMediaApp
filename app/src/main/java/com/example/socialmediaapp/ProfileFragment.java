@@ -115,14 +115,13 @@ public class ProfileFragment extends Fragment {
                     email.setText(emaill);
                     phone.setText(phonee);
                     try {
-                        Picasso.with(getContext()).load(image).into(avatartv);
+                        Picasso.with(getActivity()).load(image).into(avatartv);
                     }catch (Exception e){
 
                     }
                     try {
-                        Picasso.with(getContext()).load(cover).into(covertv);
+                        Picasso.with(getActivity()).load(cover).into(covertv);
                     }catch (Exception e){
-                        Picasso.with(getContext()).load(R.drawable.profile_image).into(avatartv);
                     }
 
                 }
