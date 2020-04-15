@@ -2,15 +2,65 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="#F1EDED"
     android:layout_height="match_parent"
     tools:context=".ProfileFragment">
 
-    <TextView
-        android:id="@+id/fragment1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Profile"
-        android:gravity="center"
-        android:textSize="30sp"
-        android:textAlignment="center"/>
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+      <RelativeLayout
+          android:layout_width="match_parent"
+          android:layout_height="180dp"
+          android:background="@color/colorPrimaryDark">
+
+
+      </RelativeLayout>
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="120dp"
+          android:layout_marginTop="100dp"
+          android:orientation="horizontal">
+      <ImageView
+          android:layout_width="120dp"
+          android:layout_height="120dp"
+          android:id="@+id/avatartv"
+          android:src="@drawable/ic_add"
+          android:background="@color/colorPrimary"
+          android:padding="5dp"
+          android:layout_marginLeft="20dp"
+          android:layout_marginStart="20dp"/>
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+              <TextView
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginStart="5dp"
+                  android:text="Name"
+                  android:id="@+id/nametv"
+                  android:layout_marginTop="5dp"
+                  android:textSize="25sp"
+                  android:textColor="@color/colorWhite"
+                  android:layout_marginLeft="5dp"/>
+              <TextView
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginStart="5dp"
+                  android:text="Email"
+                  android:id="@+id/emailtv"
+                  android:textColor="@color/colorWhite"
+                  android:layout_marginLeft="5dp"/>
+              <TextView
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginStart="5dp"
+                  android:id="@+id/phonetv"
+                  android:text="Phone"
+                  android:textColor="@color/colorWhite"
+                  android:layout_marginLeft="5dp"/>
+          </LinearLayout>
+      </LinearLayout>
+  </RelativeLayout>
 </FrameLayout>

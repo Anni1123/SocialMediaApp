@@ -140,22 +140,26 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
 
-                if (task.isSuccessful()){
+                if (task.isSuccessful()) {
+
                     loadingBar.dismiss();
-                    FirebaseUser user=mAuth.getCurrentUser();
-                    String email=user.getEmail();
-                    String uid=user.getUid();
-                    HashMap<Object,String> hashMap=new HashMap<>();
-                    hashMap.put("email",email);
-                    hashMap.put("uid",uid);
-                    hashMap.put("name","");
-                    hashMap.put("phone","");
-                    hashMap.put("image","");
-                    FirebaseDatabase database=FirebaseDatabase.getInstance();
-                    DatabaseReference reference=database.getReference("Users");
-                    reference.child(uid).setValue(hashMap);
-                    Toast.makeText(LoginActivity.this,"Registered User " +user.getEmail(),Toast.LENGTH_LONG).show();
-                    Intent mainIntent=new Intent(LoginActivity.this, DashboardActivity.class);
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    if (task.getResult().getAdditionalUserInfo().isNewUser()) {
+                        String email = user.getEmail();
+                        String uid = user.getUid();
+                        HashMap<Object, String> hashMap = new HashMap<>();
+                        hashMap.put("email", email);
+                        hashMap.put("uid", uid);
+                        hashMap.put("name", "");
+                        hashMap.put("phone", "");
+                        hashMap.put("image", "");
+                        FirebaseDatabase database = FirebaseDatabase.getInstance();
+                        DatabaseReference reference = database.getReference("Users");
+                        reference.child(uid).setValue(hashMap);
+
+                    }
+                    Toast.makeText(LoginActivity.this, "Registered User " + user.getEmail(), Toast.LENGTH_LONG).show();
+                    Intent mainIntent = new Intent(LoginActivity.this, DashboardActivity.class);
                     mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(mainIntent);
                     finish();
