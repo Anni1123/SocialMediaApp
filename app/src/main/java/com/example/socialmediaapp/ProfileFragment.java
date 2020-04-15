@@ -117,12 +117,12 @@ public class ProfileFragment extends Fragment {
                     try {
                         Picasso.with(getContext()).load(image).into(avatartv);
                     }catch (Exception e){
-                        Picasso.with(getContext()).load(R.drawable.profile_image).into(avatartv);
+
                     }
                     try {
                         Picasso.with(getContext()).load(cover).into(covertv);
                     }catch (Exception e){
-
+                        Picasso.with(getContext()).load(R.drawable.profile_image).into(avatartv);
                     }
 
                 }
