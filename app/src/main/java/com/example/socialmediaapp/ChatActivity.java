@@ -3,6 +3,7 @@ package com.example.socialmediaapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
@@ -14,9 +15,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.socialmediaapp.adapters.AdapterChat;
+import com.example.socialmediaapp.models.ModelChat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -27,7 +31,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
     Toolbar toolbar;
@@ -37,7 +43,12 @@ public class ChatActivity extends AppCompatActivity {
     EditText msg;
     ImageButton send;
     FirebaseAuth firebaseAuth;
-    String uid,myuid;
+    String uid,myuid,image;
+    ValueEventListener valueEventListener;
+    DatabaseReference userforseen;
+    List<ModelChat> chatList;
+    AdapterChat adapterChat;
+
     FirebaseDatabase firebaseDatabase;
     DatabaseReference users;
 
@@ -56,6 +67,10 @@ public class ChatActivity extends AppCompatActivity {
         msg=findViewById(R.id.messaget);
         send=findViewById(R.id.sendmsg);
 
+        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
         uid=getIntent().getStringExtra("uid");
         firebaseDatabase=FirebaseDatabase.getInstance();
         users=firebaseDatabase.getReference("Users");
@@ -65,7 +80,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
                     String nameh=""+dataSnapshot1.child("name").getValue();
-                    String image=""+dataSnapshot1.child("image").getValue();
+                    image=""+dataSnapshot1.child("image").getValue();
                     name.setText(nameh);
                     Picasso.with(ChatActivity.this).load(image).placeholder(R.drawable.profile_image).into(profile);
                 }
@@ -88,16 +103,81 @@ public class ChatActivity extends AppCompatActivity {
                     sendmessage(message);
                 }
             }
+
+        });
+        readMessages();
+        seenMessgae();
+    }
+
+    private void seenMessgae() {
+        userforseen=FirebaseDatabase.getInstance().getReference("Chats");
+        valueEventListener=userforseen.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                    ModelChat chat=dataSnapshot1.getValue(ModelChat.class);
+                    if(chat.getReceiver().equals(myuid)&&chat.getSender().equals(uid)){
+                        HashMap<String ,Object> hashMap=new HashMap<>();
+                        hashMap.put("dilihat",true);
+                        dataSnapshot1.getRef().updateChildren(hashMap);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        userforseen.removeEventListener(valueEventListener);
+    }
+
+    private void readMessages() {
+
+        chatList=new ArrayList<>();
+        DatabaseReference dbref=FirebaseDatabase.getInstance().getReference().child("Chats");
+        dbref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                chatList.clear();
+                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                    ModelChat modelChat=dataSnapshot1.getValue(ModelChat.class);
+                    if(modelChat.getReceiver().equals(myuid)&& modelChat.getSender().equals(uid)||
+                    modelChat.getReceiver().equals(uid)&&modelChat.getSender().equals(myuid)){
+                        chatList.add(modelChat);
+                    }
+                    adapterChat=new AdapterChat(ChatActivity.this,chatList,image);
+                    adapterChat.notifyDataSetChanged();
+                    recyclerView.setAdapter(adapterChat);
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
         });
     }
 
     private void sendmessage(String message) {
 
         DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
+        String timestamp=String.valueOf(System.currentTimeMillis());
         HashMap<String,Object> hashMap=new HashMap<>();
         hashMap.put("sender",myuid);
         hashMap.put("receiver",uid);
         hashMap.put("message",message);
+        hashMap.put("timestamp",timestamp);
+        hashMap.put("dilihat",false);
         databaseReference.child("Chats").push().setValue(hashMap);
         msg.setText("");
     }
