@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -85,13 +87,19 @@ public class ChatActivity extends AppCompatActivity {
                     String nameh = "" + dataSnapshot1.child("name").getValue();
                     image = "" + dataSnapshot1.child("image").getValue();
                     String onlinestatus = "" + dataSnapshot1.child("onlineStatus").getValue();
-                    if (onlinestatus.equals("online")) {
-                        userstatus.setText(onlinestatus);
-                    } else {
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTimeInMillis(Long.parseLong(onlinestatus));
-                        String timedate = DateFormat.format("dd/MM/yyyy hh:mm aa", calendar).toString();
-                        userstatus.setText("Last Seen:" + timedate);
+                    String typingto = "" + dataSnapshot1.child("typingTo").getValue();
+                    if(typingto.equals(myuid)){
+                        userstatus.setText("Typing....");
+                    }
+                    else {
+                        if (onlinestatus.equals("online")) {
+                            userstatus.setText(onlinestatus);
+                        } else {
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTimeInMillis(Long.parseLong(onlinestatus));
+                            String timedate = DateFormat.format("dd/MM/yyyy hh:mm aa", calendar).toString();
+                            userstatus.setText("Last Seen:" + timedate);
+                        }
                     }
                     name.setText(nameh);
                     try {
@@ -147,6 +155,29 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
+        msg.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                if(s.toString().trim().length()==0){
+                    checkTypingStatus("noOne");
+                }
+                else {
+                    checkTypingStatus(uid);
+                }
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(s.toString().trim().length()==0){
+                    checkTypingStatus("noOne");
+                }
+            }
+        });
     }
 
     @Override
@@ -154,6 +185,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onPause();
         String timestamp= String.valueOf(System.currentTimeMillis());
         checkOnlineStatus(timestamp);
+        checkTypingStatus("noOne");
         userforseen.removeEventListener(valueEventListener);
     }
 
@@ -168,6 +200,13 @@ public class ChatActivity extends AppCompatActivity {
         DatabaseReference dbref = FirebaseDatabase.getInstance().getReference("Users").child(myuid);
         HashMap<String,Object> hashMap=new HashMap<>();
         hashMap.put("onlineStatus", status);
+        dbref.updateChildren(hashMap);
+    }
+    private void checkTypingStatus(String typing){
+
+        DatabaseReference dbref = FirebaseDatabase.getInstance().getReference("Users").child(myuid);
+        HashMap<String,Object> hashMap=new HashMap<>();
+        hashMap.put("typingTo", typing);
         dbref.updateChildren(hashMap);
     }
     @Override
