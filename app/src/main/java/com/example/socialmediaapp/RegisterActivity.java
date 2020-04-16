@@ -3,6 +3,7 @@ package com.example.socialmediaapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import android.app.ProgressDialog;
 import android.content.Intent;

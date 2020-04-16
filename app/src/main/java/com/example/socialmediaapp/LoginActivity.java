@@ -144,6 +144,7 @@ public class LoginActivity extends AppCompatActivity {
 
                     loadingBar.dismiss();
                     FirebaseUser user = mAuth.getCurrentUser();
+
                     if (task.getResult().getAdditionalUserInfo().isNewUser()) {
                         String email = user.getEmail();
                         String uid = user.getUid();
