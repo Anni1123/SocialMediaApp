@@ -1,15 +1,18 @@
-package com.example.socialmediaapp;
+package com.example.socialmediaapp.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.socialmediaapp.ChatActivity;
+import com.example.socialmediaapp.models.ModelUsers;
+import com.example.socialmediaapp.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -35,7 +38,7 @@ public class AdapterUsers extends RecyclerView.Adapter<AdapterUsers.MyHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MyHolder holder, int position) {
-
+        final String hisuid=list.get(position).getUid();
         String userImage=list.get(position).getImage();
         String username=list.get(position).getName();
         String usermail=list.get(position).getEmail();
@@ -47,6 +50,14 @@ public class AdapterUsers extends RecyclerView.Adapter<AdapterUsers.MyHolder> {
         catch (Exception e){
             Picasso.with(context).load(userImage).placeholder(R.drawable.profile_image).into(holder.profiletv);
         }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(context, ChatActivity.class);
+                intent.putExtra("uid",hisuid);
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override

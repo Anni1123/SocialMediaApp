@@ -1,4 +1,4 @@
-package com.example.socialmediaapp;
+package com.example.socialmediaapp.models;
 
 public class ModelUsers {
     String name;
