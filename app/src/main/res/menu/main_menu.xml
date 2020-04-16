@@ -6,7 +6,13 @@
         android:id="@+id/logout"
         app:showAsAction="never"
         android:title="Logout"
-        >
+        ></item>
+    <item
+        android:id="@+id/search"
+        app:showAsAction="always"
+        android:title="Search"
+        android:icon="@drawable/ic_search"
+       app:actionViewClass="android.widget.SearchView" >
 
     </item>
 </menu>

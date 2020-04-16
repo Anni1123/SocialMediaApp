@@ -1,16 +1,24 @@
 package com.example.socialmediaapp;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -32,6 +40,7 @@ public class UsersFragment extends Fragment {
     RecyclerView recyclerView;
     AdapterUsers adapterUsers;
     List<ModelUsers> usersList;
+    FirebaseAuth firebaseAuth;
 
     public UsersFragment() {
         // Required empty public constructor
@@ -47,6 +56,7 @@ public class UsersFragment extends Fragment {
        recyclerView.setHasFixedSize(true);
        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
        usersList=new ArrayList<>();
+       firebaseAuth=FirebaseAuth.getInstance();
        getAllUsers();
        return view;
     }
@@ -74,6 +84,94 @@ public class UsersFragment extends Fragment {
 
             }
         });
+    }
+    private void searchusers(final String s)
+    {
+        final FirebaseUser firebaseUser= FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                usersList.clear();
+                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                    ModelUsers modelUsers=dataSnapshot1.getValue(ModelUsers.class);
+                    if(!modelUsers.getUid().equals(firebaseUser.getUid())){
+                        if(modelUsers.getName().toLowerCase().contains(s.toLowerCase())||
+                                modelUsers.getEmail().toLowerCase().contains(s.toLowerCase())) {
+                            usersList.add(modelUsers);
+                        }
+                    }
+                    adapterUsers=new AdapterUsers(getActivity(),usersList);
+                    adapterUsers.notifyDataSetChanged();
+                    recyclerView.setAdapter(adapterUsers);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.main_menu,menu);
+        MenuItem item=menu.findItem(R.id.search);
+        SearchView searchView=(SearchView) MenuItemCompat.getActionView(item);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if(!TextUtils.isEmpty(query.trim())){
+                    searchusers(query);
+                }
+                else {
+                    getAllUsers();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if(!TextUtils.isEmpty(newText.trim())){
+                    searchusers(newText);
+                }
+                else {
+                    getAllUsers();
+                }
+                return false;
+            }
+        });
+
+        super.onCreateOptionsMenu(menu,inflater);
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        if(item.getItemId()==R.id.logout){
+            firebaseAuth.signOut();
+            checkUserStatus();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    private void checkUserStatus(){
+        FirebaseUser user=firebaseAuth.getCurrentUser();
+        if(user!=null){
+
+        }
+        else {
+            startActivity(new Intent(getActivity(),MainActivity.class));
+            getActivity().finish();
+        }
     }
 
 }
