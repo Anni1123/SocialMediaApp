@@ -18,6 +18,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -53,12 +54,18 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.Myholder>{
 
         String message=list.get(position).getMessage();
         String timeStamp=list.get(position).getTimestamp();
-        Calendar calendar=Calendar.getInstance();
+        Calendar calendar=Calendar.getInstance(Locale.ENGLISH);
         calendar.setTimeInMillis(Long.parseLong(timeStamp));
         String timedate= DateFormat.format("dd/MM/YYYY hh:mm aa",calendar).toString();
         holder.message.setText(message);
         holder.time.setText(timedate);
-        Picasso.with(context).load(imageurl).into(holder.image);
+        try {
+            Picasso.with(context).load(imageurl).into(holder.image);
+        }
+        catch (Exception e){
+
+        }
+
 
         if(position==list.size()-1){
             if (list.get(position).isDilihat()){

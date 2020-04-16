@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,8 +33,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class ChatActivity extends AppCompatActivity {
     Toolbar toolbar;
@@ -78,11 +81,25 @@ public class ChatActivity extends AppCompatActivity {
         userquery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
-                    String nameh=""+dataSnapshot1.child("name").getValue();
-                    image=""+dataSnapshot1.child("image").getValue();
+                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()) {
+                    String nameh = "" + dataSnapshot1.child("name").getValue();
+                    image = "" + dataSnapshot1.child("image").getValue();
+                    String onlinestatus = "" + dataSnapshot1.child("onlineStatus").getValue();
+                    if (onlinestatus.equals("online")) {
+                        userstatus.setText(onlinestatus);
+                    } else {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTimeInMillis(Long.parseLong(onlinestatus));
+                        String timedate = DateFormat.format("dd/MM/yyyy hh:mm aa", calendar).toString();
+                        userstatus.setText("Last Seen:" + timedate);
+                    }
                     name.setText(nameh);
-                    Picasso.with(ChatActivity.this).load(image).placeholder(R.drawable.profile_image).into(profile);
+                    try {
+                        Picasso.with(ChatActivity.this).load(image).placeholder(R.drawable.profile_image).into(profile);
+                    }
+                    catch (Exception e){
+
+                    }
                 }
             }
 
@@ -135,9 +152,44 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        String timestamp= String.valueOf(System.currentTimeMillis());
+        checkOnlineStatus(timestamp);
         userforseen.removeEventListener(valueEventListener);
     }
 
+    @Override
+    protected void onResume() {
+        checkOnlineStatus("online");
+        super.onResume();
+    }
+
+    private void checkOnlineStatus(String status){
+
+        DatabaseReference dbref = FirebaseDatabase.getInstance().getReference("Users").child(myuid);
+        HashMap<String,Object> hashMap=new HashMap<>();
+        hashMap.put("onlineStatus", status);
+        dbref.updateChildren(hashMap);
+    }
+    @Override
+    protected void onStart() {
+        checkUserStatus();
+        checkOnlineStatus("online");
+        super.onStart();
+    }
+
+    private void sendmessage(String message) {
+
+        DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
+        String timestamp=String.valueOf(System.currentTimeMillis());
+        HashMap<String,Object> hashMap=new HashMap<>();
+        hashMap.put("sender",myuid);
+        hashMap.put("receiver",uid);
+        hashMap.put("message",message);
+        hashMap.put("timestamp",timestamp);
+        hashMap.put("dilihat",false);
+        databaseReference.child("Chats").push().setValue(hashMap);
+        msg.setText("");
+    }
     private void readMessages() {
 
         chatList=new ArrayList<>();
@@ -150,7 +202,7 @@ public class ChatActivity extends AppCompatActivity {
                 for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
                     ModelChat modelChat=dataSnapshot1.getValue(ModelChat.class);
                     if(modelChat.getReceiver().equals(myuid)&& modelChat.getSender().equals(uid)||
-                    modelChat.getReceiver().equals(uid)&&modelChat.getSender().equals(myuid)){
+                            modelChat.getReceiver().equals(uid)&&modelChat.getSender().equals(myuid)){
                         chatList.add(modelChat);
                     }
                     adapterChat=new AdapterChat(ChatActivity.this,chatList,image);
@@ -168,26 +220,6 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void sendmessage(String message) {
-
-        DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
-        String timestamp=String.valueOf(System.currentTimeMillis());
-        HashMap<String,Object> hashMap=new HashMap<>();
-        hashMap.put("sender",myuid);
-        hashMap.put("receiver",uid);
-        hashMap.put("message",message);
-        hashMap.put("timestamp",timestamp);
-        hashMap.put("dilihat",false);
-        databaseReference.child("Chats").push().setValue(hashMap);
-        msg.setText("");
-    }
-
-    @Override
-    protected void onStart() {
-        checkUserStatus();
-        super.onStart();
-    }
-
     private void checkUserStatus(){
         FirebaseUser user=firebaseAuth.getCurrentUser();
         if(user!=null){
@@ -199,20 +231,5 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        menu.findItem(R.id.search).setVisible(false);
 
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId()==R.id.logout){
-            firebaseAuth.signOut();
-            checkUserStatus();
-        }
-        return super.onOptionsItemSelected(item);
-    }
 }

@@ -48,7 +48,6 @@ public class AdapterUsers extends RecyclerView.Adapter<AdapterUsers.MyHolder> {
             Picasso.with(context).load(userImage).into(holder.profiletv);
         }
         catch (Exception e){
-            Picasso.with(context).load(userImage).placeholder(R.drawable.profile_image).into(holder.profiletv);
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

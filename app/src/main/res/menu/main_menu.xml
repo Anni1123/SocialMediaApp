@@ -4,9 +4,10 @@
 
     <item
         android:id="@+id/logout"
-        app:showAsAction="never"
         android:title="Logout"
-        ></item>
+        >
+
+    </item>
     <item
         android:id="@+id/search"
         app:showAsAction="always"

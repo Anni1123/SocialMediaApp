@@ -14,10 +14,16 @@ import android.widget.TextView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 public class DashboardActivity extends AppCompatActivity  {
 
     private FirebaseAuth firebaseAuth;
+    FirebaseUser firebaseUser;
+    String myuid;
     ActionBar actionBar;
 
     @Override
@@ -27,6 +33,7 @@ public class DashboardActivity extends AppCompatActivity  {
         actionBar=getSupportActionBar();
         actionBar.setTitle("Profile Activity");
         firebaseAuth=FirebaseAuth.getInstance();
+
         BottomNavigationView navigationView=findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(selectedListener);
         actionBar.setTitle("Home");
@@ -62,17 +69,18 @@ public class DashboardActivity extends AppCompatActivity  {
                     fragmentTransaction2.replace(R.id.content,fragment2,"");
                     fragmentTransaction2.commit();
                     return true;
-                case R.id.nav_chat:
-                    actionBar.setTitle("ChatList");
-                    ChatListFragment fragment3=new ChatListFragment();
-                    FragmentTransaction fragmentTransaction3=getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction3.replace(R.id.content,fragment3,"");
-                    fragmentTransaction3.commit();
-                    return true;
             }
             return false;
         }
     };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        checkUserStatus();
+    }
+
+
     private void checkUserStatus(){
         FirebaseUser user=firebaseAuth.getCurrentUser();
         if(user!=null){
@@ -84,11 +92,7 @@ public class DashboardActivity extends AppCompatActivity  {
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        checkUserStatus();
-    }
+
 
 
 }
