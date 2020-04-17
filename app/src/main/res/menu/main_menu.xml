@@ -16,4 +16,10 @@
        app:actionViewClass="android.widget.SearchView" >
 
     </item>
+    <item
+        android:id="@+id/add"
+        android:title="Add"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_add"
+        ></item>
 </menu>

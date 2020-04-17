@@ -125,7 +125,9 @@ public class UsersFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main_menu,menu);
+        menu.findItem(R.id.add).setVisible(false);
         MenuItem item=menu.findItem(R.id.search);
+
         SearchView searchView=(SearchView) MenuItemCompat.getActionView(item);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -163,6 +165,7 @@ public class UsersFragment extends Fragment {
             firebaseAuth.signOut();
             checkUserStatus();
         }
+
         return super.onOptionsItemSelected(item);
     }
     private void checkUserStatus(){

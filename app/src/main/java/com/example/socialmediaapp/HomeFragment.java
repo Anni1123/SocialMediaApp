@@ -62,6 +62,9 @@ String myuid;
             firebaseAuth.signOut();
 
         }
+        if(item.getItemId()==R.id.add){
+            startActivity(new Intent(getActivity(),AddPostActivity.class));
+        }
         return super.onOptionsItemSelected(item);
     }
     private void checkUserStatus(){
