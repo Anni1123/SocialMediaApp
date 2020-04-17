@@ -1,6 +1,7 @@
 package com.example.socialmediaapp.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.socialmediaapp.R;
+import com.example.socialmediaapp.ThereProfileActivity;
 import com.example.socialmediaapp.models.ModelPost;
 import com.squareup.picasso.Picasso;
 
@@ -43,7 +46,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull MyHolder holder, int position) {
-        String uid=modelPosts.get(position).getUid();
+        final String uid=modelPosts.get(position).getUid();
         String nameh=modelPosts.get(position).getUname();
         String titlee=modelPosts.get(position).getTitle();
         String descri=modelPosts.get(position).getDescription();
@@ -100,6 +103,14 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
                 Toast.makeText(context,"Share",Toast.LENGTH_LONG).show();
             }
         });
+        holder.profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(context, ThereProfileActivity.class);
+                intent.putExtra("uid", uid);
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -112,6 +123,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
         TextView name,time,title,description,like;
         ImageButton more;
         Button likes,comment,share;
+        LinearLayout profile;
         public MyHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -128,6 +140,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
             likes=itemView.findViewById(R.id.like);
             comment=itemView.findViewById(R.id.comment);
             share=itemView.findViewById(R.id.share);
+            profile=itemView.findViewById(R.id.profilelayout);
         }
     }
 }
