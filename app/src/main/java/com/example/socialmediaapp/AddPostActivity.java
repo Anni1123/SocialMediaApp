@@ -69,7 +69,6 @@ public class AddPostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_post);
         actionBar=getSupportActionBar();
         actionBar.setTitle("Post Activity");
-
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowHomeEnabled(true);
         firebaseAuth=FirebaseAuth.getInstance();
@@ -342,9 +341,9 @@ public class AddPostActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
+    public boolean onSupportNavigateUp() {
         onBackPressed();
-        super.onBackPressed();
+        return super.onSupportNavigateUp();
     }
 
     @Override

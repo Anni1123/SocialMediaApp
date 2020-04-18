@@ -108,6 +108,7 @@ public class ProfileFragment extends Fragment {
         databaseReference=firebaseDatabase.getReference("Users");
         cameraPermission=new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
         storagePermission=new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        checkUserStatus();
         avatartv=view.findViewById(R.id.avatartv);
         covertv=view.findViewById(R.id.cavertv);
         nam=view.findViewById(R.id.nametv);
@@ -301,15 +302,15 @@ public class ProfileFragment extends Fragment {
                         }
                     });
                     if(key.equals("name")){
-                        final DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference("Posts");
-                        Query query=databaseReference.orderByChild("uid").equalTo(uid);
+                        final DatabaseReference databaser=FirebaseDatabase.getInstance().getReference("Posts");
+                        Query query=databaser.orderByChild("uid").equalTo(uid);
                         query.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                 for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
-                                    String child=databaseReference.getKey();
-                                    dataSnapshot1.getRef().child(child).child("uname").setValue(value);
+                                    String child=databaser.getKey();
+                                    dataSnapshot1.getRef().child("uname").setValue(value);
                                 }
                             }
 
@@ -453,15 +454,15 @@ public class ProfileFragment extends Fragment {
                         }
                     });
                     if(profileOrCoverPhoto.equals("image")) {
-                        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Posts");
-                        Query query = databaseReference.orderByChild("uid").equalTo(uid);
+                        final DatabaseReference Reference = FirebaseDatabase.getInstance().getReference("Posts");
+                        Query query = Reference.orderByChild("uid").equalTo(uid);
                         query.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                                    String child = databaseReference.getKey();
-                                    dataSnapshot1.getRef().child(child).child("udp").setValue(downloadUri.toString());
+                                    String child =Reference.getKey();
+                                    dataSnapshot1.getRef().child("udp").setValue(downloadUri.toString());
                                 }
                             }
 
