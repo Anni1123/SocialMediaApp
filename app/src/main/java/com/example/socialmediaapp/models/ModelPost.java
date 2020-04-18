@@ -5,25 +5,13 @@ public class ModelPost {
     }
 
     String description;
+
+
+    String pid;
     String ptime;
 
-    public ModelPost(String description, String ptime, String title, String udp, String uemail, String uid, String uimage, String uname) {
-        this.description = description;
-        this.ptime = ptime;
-        this.title = title;
-        this.udp = udp;
-        this.uemail = uemail;
-        this.uid = uid;
-        this.uimage = uimage;
-        this.uname = uname;
-    }
 
     String title;
-    String udp;
-    String uemail;
-    String uid;
-    String uimage;
-    String uname;
 
     public String getDescription() {
         return description;
@@ -31,6 +19,14 @@ public class ModelPost {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getPid() {
+        return pid;
+    }
+
+    public void setPid(String pid) {
+        this.pid = pid;
     }
 
     public String getPtime() {
@@ -88,4 +84,24 @@ public class ModelPost {
     public void setUname(String uname) {
         this.uname = uname;
     }
+
+    public ModelPost(String description, String pid, String ptime, String title, String udp, String uemail, String uid, String uimage, String uname) {
+        this.description = description;
+        this.pid = pid;
+        this.ptime = ptime;
+        this.title = title;
+        this.udp = udp;
+        this.uemail = uemail;
+        this.uid = uid;
+        this.uimage = uimage;
+        this.uname = uname;
+    }
+
+    String udp;
+    String uemail;
+    String uid;
+    String uimage;
+    String uname;
+
+
 }

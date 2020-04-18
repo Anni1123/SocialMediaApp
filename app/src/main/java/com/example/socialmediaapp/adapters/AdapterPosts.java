@@ -1,15 +1,20 @@
 package com.example.socialmediaapp.adapters;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.text.format.DateFormat;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +24,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.socialmediaapp.R;
 import com.example.socialmediaapp.ThereProfileActivity;
 import com.example.socialmediaapp.models.ModelPost;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.Calendar;
@@ -29,10 +44,12 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
 
 
     Context context;
+    String myuid;
 
     public AdapterPosts(Context context, List<ModelPost> modelPosts) {
         this.context = context;
         this.modelPosts = modelPosts;
+        myuid= FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 
     List<ModelPost> modelPosts;
@@ -45,14 +62,15 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final MyHolder holder, int position) {
         final String uid=modelPosts.get(position).getUid();
         String nameh=modelPosts.get(position).getUname();
         String titlee=modelPosts.get(position).getTitle();
         String descri=modelPosts.get(position).getDescription();
-        String time=modelPosts.get(position).getPtime();
+        final String time=modelPosts.get(position).getPtime();
         String dp=modelPosts.get(position).getUdp();
-        String image=modelPosts.get(position).getUimage();
+        final String pid=modelPosts.get(position).getPid();
+        final String image=modelPosts.get(position).getUimage();
         String email=modelPosts.get(position).getUemail();
         Calendar calendar=Calendar.getInstance(Locale.ENGLISH);
         calendar.setTimeInMillis(Long.parseLong(time));
@@ -72,6 +90,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
             holder.image.setVisibility(View.GONE);
         }
         else {
+            holder.image.setVisibility(View.VISIBLE);
             try {
                 Picasso.with(context).load(image).into(holder.image);
             }
@@ -82,7 +101,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
         holder.more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context,"More",Toast.LENGTH_LONG).show();
+                showMoreOptions(holder.more,uid, myuid,time,image);
             }
         });
         holder.likes.setOnClickListener(new View.OnClickListener() {
@@ -109,6 +128,87 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
                 Intent intent=new Intent(context, ThereProfileActivity.class);
                 intent.putExtra("uid", uid);
                 context.startActivity(intent);
+            }
+        });
+    }
+
+    private void showMoreOptions(ImageButton more, String uid, String myuid,final String pid,final String image) {
+
+        PopupMenu popupMenu=new PopupMenu(context,more, Gravity.END);
+        if(uid.equals(myuid)){
+            popupMenu.getMenu().add(Menu.NONE,0,0,"DELETE");
+        }
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if(item.getItemId()==0){
+                    beginDelete(pid,image);
+                }
+                return false;
+            }
+        });
+        popupMenu.show();
+    }
+
+    private void beginDelete(String pid, String image) {
+
+        if(image.equals("noImage")){
+            deleteWithoutImage(pid);
+        }
+        else {
+            deltewithImage(pid,image);
+        }
+    }
+
+    private void deltewithImage(final String pid, String image) {
+        final ProgressDialog pd=new ProgressDialog(context);
+        pd.setMessage("Deleting");
+        StorageReference picref= FirebaseStorage.getInstance().getReferenceFromUrl(image);
+        picref.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Query query= FirebaseDatabase.getInstance().getReference("Posts").orderByChild("ptime").equalTo(pid);
+                query.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                      for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                          dataSnapshot1.getRef().removeValue();
+                      }
+                      pd.dismiss();
+                      Toast.makeText(context,"Deleted Sucessfully",Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+    }
+
+    private void deleteWithoutImage(String pid) {
+        final ProgressDialog pd=new ProgressDialog(context);
+        pd.setMessage("Deleting");
+        Query query= FirebaseDatabase.getInstance().getReference("Posts").orderByChild("ptime").equalTo(pid);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                    dataSnapshot1.getRef().removeValue();
+                }
+                pd.dismiss();
+                Toast.makeText(context,"Deleted Sucessfully",Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
             }
         });
     }
