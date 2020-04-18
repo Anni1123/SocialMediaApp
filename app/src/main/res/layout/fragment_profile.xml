@@ -21,6 +21,7 @@
 
             </ImageView>
             <LinearLayout
+                android:id="@+id/linearLayout"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
                 android:layout_marginTop="100dp"
@@ -64,6 +65,11 @@
                         android:layout_marginLeft="5dp"/>
                 </LinearLayout>
             </LinearLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerposts"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/linearLayout"/>
         </RelativeLayout>
     </ScrollView>
     <com.google.android.material.floatingactionbutton.FloatingActionButton

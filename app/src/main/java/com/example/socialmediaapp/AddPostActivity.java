@@ -95,8 +95,6 @@ public class AddPostActivity extends AppCompatActivity {
 
             }
         });
-        Toast.makeText(AddPostActivity.this,name,Toast.LENGTH_LONG).show();
-        Toast.makeText(AddPostActivity.this,name,Toast.LENGTH_LONG).show();
         cameraPermission=new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
         storagePermission=new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
         title=findViewById(R.id.ptitle);
