@@ -21,6 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.socialmediaapp.AddPostActivity;
 import com.example.socialmediaapp.R;
 import com.example.socialmediaapp.ThereProfileActivity;
 import com.example.socialmediaapp.models.ModelPost;
@@ -137,12 +138,19 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
         PopupMenu popupMenu=new PopupMenu(context,more, Gravity.END);
         if(uid.equals(myuid)){
             popupMenu.getMenu().add(Menu.NONE,0,0,"DELETE");
+            popupMenu.getMenu().add(Menu.NONE,1,0,"EDIT");
         }
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if(item.getItemId()==0){
                     beginDelete(pid,image);
+                }
+                else if(item.getItemId()==1){
+                    Intent intent=new Intent(context, AddPostActivity.class);
+                    intent.putExtra("key","editpost");
+                    intent.putExtra("editpostId",pid);
+                    context.startActivity(intent);
                 }
                 return false;
             }

@@ -14,6 +14,8 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -42,50 +44,70 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 
 public class AddPostActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
     ActionBar actionBar;
-    EditText title,des;
-    private static final int CAMERA_REQUEST=100;
-    private static final int STORAGE_REQUEST=200;
+    EditText title, des;
+    private static final int CAMERA_REQUEST = 100;
+    private static final int STORAGE_REQUEST = 200;
     String cameraPermission[];
     String storagePermission[];
     ProgressDialog pd;
     ImageView image;
-    private static final int IMAGEPICK_GALLERY_REQUEST=300;
-    private static final int IMAGE_PICKCAMERA_REQUEST=400;
+    String edititle, editdes, editimage;
+    private static final int IMAGEPICK_GALLERY_REQUEST = 300;
+    private static final int IMAGE_PICKCAMERA_REQUEST = 400;
 
-    Uri imageuri=null;
-    String name,email,uid,dp;
+    Uri imageuri = null;
+    String name, email, uid, dp;
     DatabaseReference databaseReference;
     Button upload;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_post);
-        actionBar=getSupportActionBar();
+        actionBar = getSupportActionBar();
         actionBar.setTitle("Post Activity");
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowHomeEnabled(true);
-        firebaseAuth=FirebaseAuth.getInstance();
-        pd=new ProgressDialog(this);
+        firebaseAuth = FirebaseAuth.getInstance();
+        checkUserStatus();
+        title = findViewById(R.id.ptitle);
+        des = findViewById(R.id.pdes);
+        image = findViewById(R.id.imagep);
+        upload = findViewById(R.id.pupload);
+        pd = new ProgressDialog(this);
         pd.setCanceledOnTouchOutside(false);
-        databaseReference= FirebaseDatabase.getInstance().getReference("Users");
+        Intent intent = getIntent();
+        final String updatekey = "" + intent.getStringExtra("key");
+        final String editpost = "" + intent.getStringExtra("editpostId");
+        if (updatekey.equals("editpost")) {
+            actionBar.setTitle("Edit Post");
+            upload.setText("Update Post");
+            loadTextData(editpost);
+        } else {
+            actionBar.setTitle("Add New Post");
+            upload.setText("Upload");
+        }
+        databaseReference = FirebaseDatabase.getInstance().getReference("Users");
 
         checkUserStatus();
-        Query query=databaseReference.orderByChild("email").equalTo(email);
+        Query query = databaseReference.orderByChild("email").equalTo(email);
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
-                    ModelUsers modelUsers=dataSnapshot.getValue(ModelUsers.class);
-                    name=dataSnapshot1.child("name").getValue().toString();
-                    email=""+dataSnapshot1.child("email").getValue();
-                    dp=""+dataSnapshot1.child("image").getValue().toString();
+                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                    ModelUsers modelUsers = dataSnapshot.getValue(ModelUsers.class);
+                    name = dataSnapshot1.child("name").getValue().toString();
+                    email = "" + dataSnapshot1.child("email").getValue();
+                    dp = "" + dataSnapshot1.child("image").getValue().toString();
                 }
             }
 
@@ -94,12 +116,9 @@ public class AddPostActivity extends AppCompatActivity {
 
             }
         });
-        cameraPermission=new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        storagePermission=new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        title=findViewById(R.id.ptitle);
-        des=findViewById(R.id.pdes);
-        image=findViewById(R.id.imagep);
-        upload=findViewById(R.id.pupload);
+        cameraPermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
         image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,28 +128,247 @@ public class AddPostActivity extends AppCompatActivity {
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String titl=title.getText().toString().trim();
-                String description=des.getText().toString().trim();
-                if(TextUtils.isEmpty(titl)){
-                    Toast.makeText(AddPostActivity.this,"Title cant be empty",Toast.LENGTH_LONG).show();
+                String titl = title.getText().toString().trim();
+                String description = des.getText().toString().trim();
+                if (TextUtils.isEmpty(titl)) {
+                    Toast.makeText(AddPostActivity.this, "Title cant be empty", Toast.LENGTH_LONG).show();
                     return;
                 }
-                if(TextUtils.isEmpty(description)){
-                    Toast.makeText(AddPostActivity.this,"Description cant be empty",Toast.LENGTH_LONG).show();
+                if (TextUtils.isEmpty(description)) {
+                    Toast.makeText(AddPostActivity.this, "Description cant be empty", Toast.LENGTH_LONG).show();
                     return;
                 }
-                if(imageuri==null){
-                    uploadData(titl,description,"noImage");
-                }
-                else {
-                    uploadData(titl,description,String.valueOf(imageuri));
+                if (updatekey.equals("editpost")) {
+                    beginupdate(titl, description, editpost);
+                } else {
+                    uploadData(titl, description);
                 }
 
 
             }
         });
         actionBar.setSubtitle(email);
-    } private void checkUserStatus(){
+    }
+
+    private void beginupdate(String titl, String description, String editpost) {
+
+        pd.setMessage("Updating");
+        pd.show();
+        if (!editimage.equals("noImage")) {
+            updatewithImage(titl, description, editpost);
+        } else if(image.getDrawable()!=null) {
+            updatewithNowImage(titl, description, editpost);
+        }
+        else {
+            updatewithOutImage(titl,description,editpost);
+        }
+    }
+
+    private void updatewithOutImage(String titl, String description, String editpost) {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("uid", uid);
+        hashMap.put("uname", name);
+        hashMap.put("uemail", email);
+        hashMap.put("udp", dp);
+        hashMap.put("title", titl);
+        hashMap.put("description", description);
+        hashMap.put("uimage", "noImage");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Posts");
+        databaseReference.child(editpost).updateChildren(hashMap)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        pd.dismiss();
+                        Toast.makeText(AddPostActivity.this, "Published", Toast.LENGTH_LONG).show();
+                        title.setText("");
+                        des.setText("");
+                        image.setImageURI(null);
+                        imageuri = null;
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                pd.dismiss();
+                Toast.makeText(AddPostActivity.this, "Failed", Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+    }
+
+    private void updatewithNowImage(final String titl, final String description, final String editpost) {
+        final String timestamp = String.valueOf(System.currentTimeMillis());
+        String filepathname = "Posts/" + "post" + timestamp;
+        Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] data = byteArrayOutputStream.toByteArray();
+
+        StorageReference storageReference1 = FirebaseStorage.getInstance().getReference().child(filepathname);
+        storageReference1.putBytes(data).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                while (!uriTask.isSuccessful()) ;
+                String downloadUri = uriTask.getResult().toString();
+                if (uriTask.isSuccessful()) {
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("uid", uid);
+                    hashMap.put("uname", name);
+                    hashMap.put("uemail", email);
+                    hashMap.put("udp", dp);
+                    hashMap.put("title", titl);
+                    hashMap.put("description", description);
+                    hashMap.put("uimage", downloadUri);
+                    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Posts");
+                    databaseReference.child(editpost).updateChildren(hashMap)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    pd.dismiss();
+                                    Toast.makeText(AddPostActivity.this, "Published", Toast.LENGTH_LONG).show();
+                                    title.setText("");
+                                    des.setText("");
+                                    image.setImageURI(null);
+                                    imageuri = null;
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            pd.dismiss();
+                            Toast.makeText(AddPostActivity.this, "Failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+
+                }
+            }
+        });
+    }
+
+    private void updatewithImage(final String titl, final String description, final String editpost) {
+        StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(editimage);
+        storageReference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                final String timestamp = String.valueOf(System.currentTimeMillis());
+                String filepathname = "Posts/" + "post" + timestamp;
+                Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                byte[] data = byteArrayOutputStream.toByteArray();
+
+                StorageReference storageReference1 = FirebaseStorage.getInstance().getReference().child(filepathname);
+                storageReference1.putBytes(data).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                        while (!uriTask.isSuccessful()) ;
+                        String downloadUri = uriTask.getResult().toString();
+                        if (uriTask.isSuccessful()) {
+                            HashMap<String,Object> hashMap = new HashMap<>();
+                            hashMap.put("uid", uid);
+                            hashMap.put("uname", name);
+                            hashMap.put("uemail", email);
+                            hashMap.put("udp", dp);
+                            hashMap.put("title", titl);
+                            hashMap.put("description", description);
+                            hashMap.put("uimage", downloadUri);
+                            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Posts");
+                            databaseReference.child(editpost).updateChildren(hashMap)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            pd.dismiss();
+                                            Toast.makeText(AddPostActivity.this, "Published", Toast.LENGTH_LONG).show();
+                                            title.setText("");
+                                            des.setText("");
+                                            image.setImageURI(null);
+                                            imageuri = null;
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    pd.dismiss();
+                                    Toast.makeText(AddPostActivity.this, "Failed", Toast.LENGTH_LONG).show();
+                                }
+                            });
+
+                        }
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        pd.dismiss();
+                        Toast.makeText(AddPostActivity.this, "Failed", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+    }
+    private void showImagePicDialog() {
+        String options[]={ "Camera","Gallery"};
+        AlertDialog.Builder builder=new AlertDialog.Builder(AddPostActivity.this);
+        builder.setTitle("Pick Image From");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                if(which==0){
+                    if(!checkCameraPermission()){
+                        requestCameraPermission();
+                    }
+                    else {
+                        pickFromCamera();
+                    }
+                }else if(which==1){
+                    if(!checkStoragePermission()){
+                        requestStoragePermission();
+                    }
+                    else {
+                        pickFromGallery();
+                    }
+
+                }
+            }
+        });
+        builder.create().show();
+    }
+
+
+
+    private void loadTextData(final String editpost) {
+        DatabaseReference databaseRef=FirebaseDatabase.getInstance().getReference("Posts");
+        Query query=databaseRef.orderByChild("ptime").equalTo(editpost);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+
+                   editdes=dataSnapshot1.child("description").getValue().toString();
+                    edititle=""+dataSnapshot1.child("title").getValue();
+                    editimage=""+dataSnapshot1.child("uimage").getValue().toString();
+                    title.setText(edititle);
+                    des.setText(editdes);
+                    try {
+                        Picasso.with(AddPostActivity.this).load(editimage).into(image);
+                    }
+                    catch (Exception e){
+
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void checkUserStatus(){
         FirebaseUser user=firebaseAuth.getCurrentUser();
         if(user!=null){
             email=user.getEmail();
@@ -142,16 +380,22 @@ public class AddPostActivity extends AppCompatActivity {
         }
     }
 
-    private void uploadData(final String titl, final String description, final String uri) {
+    private void uploadData(final String titl, final String description) {
 
         pd.setMessage("Publishing Post");
         pd.show();
         final String timestamp=String.valueOf(System.currentTimeMillis());
         String filepathname=  "Posts/" + "post" +timestamp;
-        if(!uri.equals("noImage")){
+        if(image.getDrawable()!=null)
+        {
+
+            Bitmap bitmap=((BitmapDrawable)image.getDrawable()).getBitmap();
+            ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG,100,byteArrayOutputStream);
+            byte[] data=byteArrayOutputStream.toByteArray();
 
             StorageReference storageReference1= FirebaseStorage.getInstance().getReference().child(filepathname);
-            storageReference1.putFile(Uri.parse(uri)).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            storageReference1.putBytes(data).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     Task<Uri> uriTask=taskSnapshot.getStorage().getDownloadUrl();
@@ -235,37 +479,9 @@ public class AddPostActivity extends AppCompatActivity {
 
 
 
-    private void showImagePicDialog() {
-        String options[]={ "Camera","Gallery"};
-        AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        builder.setTitle("Pick Image From");
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                if(which==0){
-                    if(!checkCameraPermission()){
-                        requestCameraPermission();
-                    }
-                    else {
-                        pickFromCamera();
-                    }
-                }else if(which==1){
-                    if(!checkStoragePermission()){
-                        requestStoragePermission();
-                    }
-                    else {
-                        pickFromGallery();
-                    }
-
-                }
-            }
-        });
-        builder.create().show();
-    }
 
     private Boolean checkStoragePermission(){
-        boolean result= ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        boolean result= ContextCompat.checkSelfPermission(AddPostActivity.this,Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 ==(PackageManager.PERMISSION_GRANTED);
         return result;
     }
