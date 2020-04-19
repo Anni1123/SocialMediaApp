@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.socialmediaapp.AddPostActivity;
+import com.example.socialmediaapp.PostDetailsActivity;
 import com.example.socialmediaapp.R;
 import com.example.socialmediaapp.ThereProfileActivity;
 import com.example.socialmediaapp.models.ModelPost;
@@ -118,6 +119,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
             @Override
             public void onClick(View v) {
 
+
                 final int plike=Integer.parseInt(modelPosts.get(position).getPlike());
                 mprocesslike=true;
                 final String postid=modelPosts.get(position).getPtime();
@@ -149,7 +151,9 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
         holder.comment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context,"Comment",Toast.LENGTH_LONG).show();
+                Intent intent=new Intent(context, PostDetailsActivity.class);
+                intent.putExtra("pid",time);
+                context.startActivity(intent);
             }
         });
         holder.share.setOnClickListener(new View.OnClickListener() {
@@ -198,6 +202,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
             popupMenu.getMenu().add(Menu.NONE,0,0,"DELETE");
             popupMenu.getMenu().add(Menu.NONE,1,0,"EDIT");
         }
+        popupMenu.getMenu().add(Menu.NONE,2,0,"View Detail");
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -208,6 +213,11 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
                     Intent intent=new Intent(context, AddPostActivity.class);
                     intent.putExtra("key","editpost");
                     intent.putExtra("editpostId",pid);
+                    context.startActivity(intent);
+                }
+                else if(item.getItemId()==2){
+                    Intent intent=new Intent(context, PostDetailsActivity.class);
+                    intent.putExtra("pid",pid);
                     context.startActivity(intent);
                 }
                 return false;
