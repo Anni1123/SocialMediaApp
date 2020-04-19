@@ -7,12 +7,6 @@ public class ModelPost {
     String description;
 
 
-    String pid;
-    String ptime;
-
-
-    String title;
-
     public String getDescription() {
         return description;
     }
@@ -85,7 +79,26 @@ public class ModelPost {
         this.uname = uname;
     }
 
-    public ModelPost(String description, String pid, String ptime, String title, String udp, String uemail, String uid, String uimage, String uname) {
+    public String getPlike() {
+        return plike;
+    }
+
+    public void setPlike(String plike) {
+        this.plike = plike;
+    }
+
+    String pid;
+    String ptime;
+
+
+    String title;
+
+    String udp;
+    String uemail;
+    String uid;
+    String uimage;
+
+    public ModelPost(String description, String pid, String ptime, String title, String udp, String uemail, String uid, String uimage, String uname, String plike) {
         this.description = description;
         this.pid = pid;
         this.ptime = ptime;
@@ -95,13 +108,10 @@ public class ModelPost {
         this.uid = uid;
         this.uimage = uimage;
         this.uname = uname;
+        this.plike = plike;
     }
 
-    String udp;
-    String uemail;
-    String uid;
-    String uimage;
-    String uname;
+    String uname,plike;
 
 
 }

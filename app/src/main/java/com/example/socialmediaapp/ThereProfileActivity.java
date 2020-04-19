@@ -41,7 +41,7 @@ public class ThereProfileActivity extends AppCompatActivity {
     RecyclerView postrecycle;
     List<ModelPost> posts;
     AdapterPosts adapterPosts;
-    String uid;
+    String uid,fuid;
     ImageView avatartv,covertv;
     TextView nam,email,phone;
     ActionBar actionBar;
@@ -66,7 +66,7 @@ public class ThereProfileActivity extends AppCompatActivity {
         firebaseAuth=FirebaseAuth.getInstance();
         uid=getIntent().getStringExtra("uid");
         posts=new ArrayList<>();
-        Query query=FirebaseDatabase.getInstance().getReference("Users").orderByChild("email").equalTo(uid);
+        Query query=FirebaseDatabase.getInstance().getReference("Users").orderByChild("uid").equalTo(uid);
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -98,20 +98,20 @@ public class ThereProfileActivity extends AppCompatActivity {
             }
         });
         checkUserStatus();
-        loadMyPosts();
+        loadHisPosts();
 
     }
     private void checkUserStatus(){
         FirebaseUser user=firebaseAuth.getCurrentUser();
         if(user!=null){
-            uid=user.getUid();
+            fuid=user.getUid();
         }
         else {
             startActivity(new Intent(ThereProfileActivity.this,MainActivity.class));
            finish();
         }
     }
-    private void loadMyPosts() {
+    private void loadHisPosts() {
         LinearLayoutManager layoutManager=new LinearLayoutManager(this);
         layoutManager.setReverseLayout(true);
         layoutManager.setStackFromEnd(true);
@@ -189,7 +189,7 @@ public class ThereProfileActivity extends AppCompatActivity {
                     searchMyPosts(query);
                 }
                 else {
-                    loadMyPosts();
+                    loadHisPosts();
                 }
                 return false;
             }
@@ -200,7 +200,7 @@ public class ThereProfileActivity extends AppCompatActivity {
                     searchMyPosts(newText);
                 }
                 else {
-                    loadMyPosts();
+                    loadHisPosts();
                 }
                 return false;
             }

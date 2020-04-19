@@ -30,6 +30,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
@@ -46,11 +47,16 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
 
     Context context;
     String myuid;
+    private DatabaseReference liekeref,postref;
+    boolean mprocesslike=false;
+
 
     public AdapterPosts(Context context, List<ModelPost> modelPosts) {
         this.context = context;
         this.modelPosts = modelPosts;
         myuid= FirebaseAuth.getInstance().getCurrentUser().getUid();
+        liekeref=FirebaseDatabase.getInstance().getReference().child("Likes");
+        postref=FirebaseDatabase.getInstance().getReference().child("Posts");
     }
 
     List<ModelPost> modelPosts;
@@ -63,7 +69,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final MyHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final MyHolder holder, final int position) {
         final String uid=modelPosts.get(position).getUid();
         String nameh=modelPosts.get(position).getUname();
         String titlee=modelPosts.get(position).getTitle();
@@ -71,6 +77,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
         final String time=modelPosts.get(position).getPtime();
         String dp=modelPosts.get(position).getUdp();
         final String pid=modelPosts.get(position).getPid();
+        String plike=modelPosts.get(position).getPlike();
         final String image=modelPosts.get(position).getUimage();
         String email=modelPosts.get(position).getUemail();
         Calendar calendar=Calendar.getInstance(Locale.ENGLISH);
@@ -80,6 +87,8 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
         holder.title.setText(titlee);
         holder.description.setText(descri);
         holder.time.setText(timedate);
+        holder.like.setText(plike + "Likes");
+        setLikes(holder,time);
         try {
             Picasso.with(context).load(dp).into(holder.picture);
         } catch (Exception e) {
@@ -105,10 +114,36 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
                 showMoreOptions(holder.more,uid, myuid,time,image);
             }
         });
-        holder.likes.setOnClickListener(new View.OnClickListener() {
+        holder.likebtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context,"Like",Toast.LENGTH_LONG).show();
+
+                final int plike=Integer.parseInt(modelPosts.get(position).getPlike());
+                mprocesslike=true;
+                final String postid=modelPosts.get(position).getPtime();
+                liekeref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                        if(mprocesslike){
+                            if(dataSnapshot.child(postid).hasChild(myuid)){
+                                postref.child(postid).child("plike").setValue(""+(plike-1));
+                                liekeref.child(postid).child(myuid).removeValue();
+                                mprocesslike=false;
+                            }
+                            else {
+                                postref.child(postid).child("plike").setValue(""+(plike+1));
+                                liekeref.child(postid).child(myuid).setValue("Liked");
+                                mprocesslike=false;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
             }
         });
         holder.comment.setOnClickListener(new View.OnClickListener() {
@@ -131,6 +166,29 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
                 context.startActivity(intent);
             }
         });
+    }
+
+    private void setLikes(final MyHolder holder,final String pid) {
+        liekeref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if(dataSnapshot.child(pid).hasChild(myuid)){
+                    holder.likebtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_liked,0,0,0);
+                    holder.likebtn.setText("Liked");
+                }
+                else {
+                    holder.likebtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_like,0,0,0);
+                    holder.likebtn.setText("Like");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
     private void showMoreOptions(ImageButton more, String uid, String myuid,final String pid,final String image) {
@@ -230,7 +288,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
         ImageView picture,image;
         TextView name,time,title,description,like;
         ImageButton more;
-        Button likes,comment,share;
+        Button likebtn,comment,share;
         LinearLayout profile;
         public MyHolder(@NonNull View itemView) {
             super(itemView);
@@ -245,7 +303,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
             title=itemView.findViewById(R.id.ptitletv);
             description=itemView.findViewById(R.id.descript);
             like=itemView.findViewById(R.id.plikeb);
-            likes=itemView.findViewById(R.id.like);
+            likebtn=itemView.findViewById(R.id.like);
             comment=itemView.findViewById(R.id.comment);
             share=itemView.findViewById(R.id.share);
             profile=itemView.findViewById(R.id.profilelayout);
