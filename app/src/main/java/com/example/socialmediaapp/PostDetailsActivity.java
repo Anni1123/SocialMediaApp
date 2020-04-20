@@ -7,7 +7,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,9 +18,13 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.socialmediaapp.notifications.Data;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -27,24 +33,28 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class PostDetailsActivity extends AppCompatActivity {
 
 
-    String myuid,myname,myemail,mydp,
+    String ptime,myuid,myname,myemail,mydp,uimage,
     postId,plike,hisdp,hisname;
     ImageView picture,image;
-    TextView name,time,title,description,like;
+    TextView name,time,title,description,like,tcomment;
     ImageButton more;
     Button likebtn,share;
     LinearLayout profile;
     EditText comment;
     ImageButton sendb;
     ImageView imagep;
+    boolean mlike=false;
     ActionBar actionBar;
     ProgressDialog progressDialog;
     @Override
@@ -63,6 +73,7 @@ public class PostDetailsActivity extends AppCompatActivity {
         more=findViewById(R.id.morebtn);
         title=findViewById(R.id.ptitleco);
         description=findViewById(R.id.descriptco);
+        tcomment=findViewById(R.id.pcommenttv);
         like=findViewById(R.id.plikebco);
         likebtn=findViewById(R.id.like);
         comment=findViewById(R.id.typecommet);
@@ -74,6 +85,7 @@ public class PostDetailsActivity extends AppCompatActivity {
         loadPostInfo();
         checkUserStatus();
         loadUserInfo();
+        setLikes();
         actionBar.setSubtitle("SignedInAs:" +myemail);
         sendb.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,11 +93,219 @@ public class PostDetailsActivity extends AppCompatActivity {
                 postComment();
             }
         });
+        likebtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                likepost();
+            }
+        });
+        more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showmoreoptions();
+            }
+        });
+
+    }
+
+    private void showmoreoptions() {
+        PopupMenu popupMenu=new PopupMenu(PostDetailsActivity.this,more, Gravity.END);
+        if(ptime.equals(myuid)){
+            popupMenu.getMenu().add(Menu.NONE,0,0,"DELETE");
+            popupMenu.getMenu().add(Menu.NONE,1,0,"EDIT");
+        }
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if(item.getItemId()==0){
+                    beginDelete();
+                }
+                else if(item.getItemId()==1){
+                    Intent intent=new Intent(PostDetailsActivity.this, AddPostActivity.class);
+                    intent.putExtra("key","editpost");
+                    intent.putExtra("editpostId",postId);
+                    startActivity(intent);
+                }
+                return false;
+            }
+        });
+        popupMenu.show();
+    }
+
+    private void beginDelete() {
+
+        if(uimage.equals("noImage")){
+            deleteWithoutImage();
+        }
+        else {
+            deltewithImage();
+        }
+    }
+
+    private void deltewithImage(){
+        final ProgressDialog pd=new ProgressDialog(this);
+        pd.setMessage("Deleting");
+        StorageReference picref= FirebaseStorage.getInstance().getReferenceFromUrl(uimage);
+        picref.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Query query= FirebaseDatabase.getInstance().getReference("Posts").orderByChild("ptime").equalTo(postId);
+                query.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                            dataSnapshot1.getRef().removeValue();
+                        }
+                        pd.dismiss();
+                        Toast.makeText(PostDetailsActivity.this,"Deleted Sucessfully",Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+    }
+    private void deleteWithoutImage() {
+        final ProgressDialog pd=new ProgressDialog(PostDetailsActivity.this);
+        pd.setMessage("Deleting");
+        Query query= FirebaseDatabase.getInstance().getReference("Posts").orderByChild("ptime").equalTo(postId);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                    dataSnapshot1.getRef().removeValue();
+                }
+                pd.dismiss();
+                Toast.makeText(PostDetailsActivity.this,"Deleted Sucessfully",Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void setLikes() {
+        final DatabaseReference liekeref=FirebaseDatabase.getInstance().getReference().child("Likes");
+        liekeref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if(dataSnapshot.child(postId).hasChild(myuid)){
+                    likebtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_liked,0,0,0);
+                    likebtn.setText("Liked");
+                }
+                else {
+                   likebtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_like,0,0,0);
+                    likebtn.setText("Like");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void likepost() {
+
+        mlike=true;
+        final DatabaseReference liekeref=FirebaseDatabase.getInstance().getReference().child("Likes");
+        final DatabaseReference postref=FirebaseDatabase.getInstance().getReference().child("Posts");
+        liekeref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if(mlike){
+                    if(dataSnapshot.child(postId).hasChild(myuid)){
+                        postref.child(postId).child("plike").setValue(""+(Integer.parseInt(plike)-1));
+                        liekeref.child(postId).child(myuid).removeValue();
+                        mlike=false;
+
+                    }
+                    else {
+                        postref.child(postId).child("plike").setValue(""+(Integer.parseInt(plike)+1));
+                        liekeref.child(postId).child(myuid).setValue("Liked");
+                        mlike=false;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void postComment() {
         progressDialog.setMessage("Adding Comment");
 
+        final String commentss=comment.getText().toString().trim();
+        if(TextUtils.isEmpty(commentss)){
+            Toast.makeText(PostDetailsActivity.this,"Empty comment",Toast.LENGTH_LONG).show();
+            return;
+        }
+        progressDialog.show();
+        String timestamp=String.valueOf(System.currentTimeMillis());
+        DatabaseReference datarf=FirebaseDatabase.getInstance().getReference("Posts").child(postId).child("Comments");
+        HashMap<String ,Object> hashMap=new HashMap<>();
+        hashMap.put("cId",timestamp);
+        hashMap.put("comment",commentss);
+        hashMap.put("ptime",timestamp);
+        hashMap.put("uid",myuid);
+        hashMap.put("uemail",myemail);
+        hashMap.put("udp",mydp);
+        hashMap.put("uname",myname);
+        datarf.child(timestamp).setValue(hashMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                progressDialog.dismiss();
+                Toast.makeText(PostDetailsActivity.this,"Added",Toast.LENGTH_LONG).show();
+                comment.setText("");
+                updatecommetcount();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progressDialog.dismiss();
+                Toast.makeText(PostDetailsActivity.this,"Failed",Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    boolean count=false;
+    private void updatecommetcount() {
+        count=true;
+        final DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Posts").child(postId);
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(count){
+                    String comments=""+dataSnapshot.child("pcomments").getValue();
+                    int newcomment=Integer.parseInt(comments)+1;
+                    reference.child("pcomments").setValue(""+newcomment);
+                    count=false;
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void loadUserInfo() {
@@ -124,17 +344,22 @@ public class PostDetailsActivity extends AppCompatActivity {
                 for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
                     String ptitle=dataSnapshot1.child("title").getValue().toString();
                     String descriptions=dataSnapshot1.child("description").getValue().toString();
-                    String uimage=dataSnapshot1.child("uimage").getValue().toString();
+                  uimage=dataSnapshot1.child("uimage").getValue().toString();
                     hisdp=dataSnapshot1.child("udp").getValue().toString();
                     String uemail=dataSnapshot1.child("uemail").getValue().toString();
                     hisname=dataSnapshot1.child("uname").getValue().toString();
-                    String ptime=dataSnapshot1.child("ptime").getValue().toString();
+                    ptime=dataSnapshot1.child("ptime").getValue().toString();
                     plike=dataSnapshot1.child("plike").getValue().toString();
+                    String commentcount=dataSnapshot1.child("pcomments").getValue().toString();
+                    Calendar calendar=Calendar.getInstance(Locale.ENGLISH);
+                    calendar.setTimeInMillis(Long.parseLong(ptime));
+                    String timedate= DateFormat.format("dd/MM/yyyy hh:mm aa",calendar).toString();
                     name.setText(hisname);
                     title.setText(ptitle);
                     description.setText(descriptions);
-                    like.setText(plike +"Likes");
-                    time.setText(ptime);
+                    like.setText(plike +" Likes");
+                    time.setText(timedate);
+                    tcomment.setText(commentcount + " Comments");
                     if(uimage.equals("noImage")){
                        image.setVisibility(View.GONE);
                     }

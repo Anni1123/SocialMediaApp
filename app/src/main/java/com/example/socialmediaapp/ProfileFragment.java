@@ -319,6 +319,39 @@ public class ProfileFragment extends Fragment {
 
                             }
                         });
+                        databaser.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                                    String child=dataSnapshot1.getKey();
+                                    if(dataSnapshot.child(child).hasChild("Comments")){
+                                        String child1=dataSnapshot.child(child).getKey();
+                                        Query child2=FirebaseDatabase.getInstance().getReference("Posts").child(child1).child("Comments").orderByChild("uid").equalTo(uid);
+                                        child2.addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                                                    String child=databaser.getKey();
+                                                    dataSnapshot1.getRef().child("uname").setValue(value);
+                                                }
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+                                }
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
                     }
                 }
                 else {
@@ -471,6 +504,40 @@ public class ProfileFragment extends Fragment {
 
                             }
                         });
+                        Reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                                    String child=dataSnapshot1.getKey();
+                                    if(dataSnapshot.child(child).hasChild("Comments")){
+                                        String child1=dataSnapshot.child(child).getKey();
+                                        Query child2=FirebaseDatabase.getInstance().getReference("Posts").child(child1).child("Comments").orderByChild("uid").equalTo(uid);
+                                        child2.addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                                                    String child =Reference.getKey();
+                                                    dataSnapshot1.getRef().child("udp").setValue(downloadUri.toString());
+                                                }
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+                                }
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
                     }
                 }
                 else {

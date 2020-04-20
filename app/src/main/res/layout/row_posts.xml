@@ -72,12 +72,28 @@
             android:layout_height="200dp"
             android:id="@+id/pimagetv"
             android:background="@color/colorWhite"/>
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/plikeb"
-            android:textColor="@color/colorPrimary"
-            android:text="1.2K Likes"/>
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/plikeb"
+                android:layout_weight="1"
+                android:textColor="@color/colorPrimary"
+                android:text="1.2K Likes"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/pcommentco"
+                android:layout_weight="1"
+                android:textAlignment="textEnd"
+                android:textColor="@color/colorPrimary"
+                android:text="1.2K Comment"/>
+        </LinearLayout>
+
 <View
     android:layout_width="match_parent"
     android:layout_height="1dp"

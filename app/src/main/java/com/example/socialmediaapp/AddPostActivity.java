@@ -166,17 +166,16 @@ public class AddPostActivity extends AppCompatActivity {
 
     private void updatewithOutImage(String titl, String description, String editpost) {
         pd.show();
-        final String timestamp = String.valueOf(System.currentTimeMillis());
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("uid", uid);
         hashMap.put("uname", name);
         hashMap.put("uemail", email);
         hashMap.put("udp", dp);
         hashMap.put("title", titl);
-        hashMap.put("ptime",timestamp);
         hashMap.put("description", description);
         hashMap.put("uimage", "noImage");
         hashMap.put("plike","0");
+        hashMap.put("pcomments","0");
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Posts");
         databaseReference.child(editpost).updateChildren(hashMap)
@@ -189,6 +188,8 @@ public class AddPostActivity extends AppCompatActivity {
                         des.setText("");
                         image.setImageURI(null);
                         imageuri = null;
+                        startActivity(new Intent(AddPostActivity.this,DashboardActivity.class));
+                        finish();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -202,7 +203,6 @@ public class AddPostActivity extends AppCompatActivity {
     }
 
     private void updatewithNowImage(final String titl, final String description, final String editpost) {
-        pd.show();
         final String timestamp = String.valueOf(System.currentTimeMillis());
         String filepathname = "Posts/" + "post" + timestamp;
         Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
@@ -223,11 +223,11 @@ public class AddPostActivity extends AppCompatActivity {
                     hashMap.put("uname", name);
                     hashMap.put("uemail", email);
                     hashMap.put("udp", dp);
-                    hashMap.put("ptime",timestamp);
                     hashMap.put("title", titl);
                     hashMap.put("description", description);
                     hashMap.put("uimage", downloadUri);
                     hashMap.put("plike","0");
+                    hashMap.put("pcomments","0");
                     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Posts");
                     databaseReference.child(editpost).updateChildren(hashMap)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -239,6 +239,8 @@ public class AddPostActivity extends AppCompatActivity {
                                     des.setText("");
                                     image.setImageURI(null);
                                     imageuri = null;
+                                    startActivity(new Intent(AddPostActivity.this,DashboardActivity.class));
+                                    finish();
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -280,11 +282,11 @@ public class AddPostActivity extends AppCompatActivity {
                             hashMap.put("uname", name);
                             hashMap.put("uemail", email);
                             hashMap.put("udp", dp);
-                            hashMap.put("ptime",timestamp);
                             hashMap.put("title", titl);
                             hashMap.put("description", description);
                             hashMap.put("uimage", downloadUri);
                             hashMap.put("plike","0");
+                            hashMap.put("pcomments","0");
                             DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Posts");
                             databaseReference.child(editpost).updateChildren(hashMap)
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -296,6 +298,9 @@ public class AddPostActivity extends AppCompatActivity {
                                             des.setText("");
                                             image.setImageURI(null);
                                             imageuri = null;
+                                            startActivity(new Intent(AddPostActivity.this,DashboardActivity.class));
+                                            finish();
+
                                         }
                                     }).addOnFailureListener(new OnFailureListener() {
                                 @Override
@@ -423,6 +428,7 @@ public class AddPostActivity extends AppCompatActivity {
                         hashMap.put("uimage",downloadUri);
                         hashMap.put("ptime",timestamp);
                         hashMap.put("plike","0");
+                        hashMap.put("pcomments","0");
                         DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference("Posts");
                         databaseReference.child(timestamp).setValue(hashMap)
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -434,6 +440,8 @@ public class AddPostActivity extends AppCompatActivity {
                                         des.setText("");
                                         image.setImageURI(null);
                                         imageuri=null;
+                                        startActivity(new Intent(AddPostActivity.this,DashboardActivity.class));
+                                        finish();
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -467,6 +475,7 @@ public class AddPostActivity extends AppCompatActivity {
                 hashMap.put("uimage","noImage");
                 hashMap.put("ptime",timestamp);
                 hashMap.put("plike","0");
+                hashMap.put("pcomments","0");
                 DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference("Posts");
                 databaseReference.child(timestamp).setValue(hashMap)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -478,6 +487,8 @@ public class AddPostActivity extends AppCompatActivity {
                                 des.setText("");
                                 image.setImageURI(null);
                                 imageuri=null;
+                                startActivity(new Intent(AddPostActivity.this,DashboardActivity.class));
+                                finish();
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override

@@ -75,21 +75,22 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
         String nameh=modelPosts.get(position).getUname();
         String titlee=modelPosts.get(position).getTitle();
         String descri=modelPosts.get(position).getDescription();
-        final String time=modelPosts.get(position).getPtime();
+        final String ptime=modelPosts.get(position).getPtime();
         String dp=modelPosts.get(position).getUdp();
-        final String pid=modelPosts.get(position).getPid();
         String plike=modelPosts.get(position).getPlike();
         final String image=modelPosts.get(position).getUimage();
         String email=modelPosts.get(position).getUemail();
+        String comm=modelPosts.get(position).getPcomments();
         Calendar calendar=Calendar.getInstance(Locale.ENGLISH);
-        calendar.setTimeInMillis(Long.parseLong(time));
+        calendar.setTimeInMillis(Long.parseLong(ptime));
         String timedate= DateFormat.format("dd/MM/yyyy hh:mm aa",calendar).toString();
         holder.name.setText(nameh);
         holder.title.setText(titlee);
         holder.description.setText(descri);
         holder.time.setText(timedate);
-        holder.like.setText(plike + "Likes");
-        setLikes(holder,time);
+        holder.like.setText(plike + " Likes");
+        holder.comments.setText(comm + " Comments");
+        setLikes(holder,ptime);
         try {
             Picasso.with(context).load(dp).into(holder.picture);
         } catch (Exception e) {
@@ -112,7 +113,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
         holder.more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showMoreOptions(holder.more,uid, myuid,time,image);
+                showMoreOptions(holder.more,uid, myuid,ptime,image);
             }
         });
         holder.likebtn.setOnClickListener(new View.OnClickListener() {
@@ -152,7 +153,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(context, PostDetailsActivity.class);
-                intent.putExtra("pid",time);
+                intent.putExtra("pid",ptime);
                 context.startActivity(intent);
             }
         });
@@ -296,7 +297,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
 
     class MyHolder extends RecyclerView.ViewHolder{
         ImageView picture,image;
-        TextView name,time,title,description,like;
+        TextView name,time,title,description,like,comments;
         ImageButton more;
         Button likebtn,comment,share;
         LinearLayout profile;
@@ -313,6 +314,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
             title=itemView.findViewById(R.id.ptitletv);
             description=itemView.findViewById(R.id.descript);
             like=itemView.findViewById(R.id.plikeb);
+            comments=itemView.findViewById(R.id.pcommentco);
             likebtn=itemView.findViewById(R.id.like);
             comment=itemView.findViewById(R.id.comment);
             share=itemView.findViewById(R.id.share);
