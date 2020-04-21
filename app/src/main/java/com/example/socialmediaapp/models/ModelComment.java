@@ -1,26 +1,21 @@
 package com.example.socialmediaapp.models;
 
 public class ModelComment {
-String cid;
+String cId;
 
-    public ModelComment(String cid, String comment, String ptime, String udp, String uemail, String uid, String uname) {
-        this.cid = cid;
-        this.comment = comment;
-        this.ptime = ptime;
-        this.udp = udp;
-        this.uemail = uemail;
-        this.uid = uid;
-        this.uname = uname;
-    }
 
     String comment;
 
-    public String getCid() {
-        return cid;
+    String ptime;
+
+    String udp;
+
+    public String getcId() {
+        return cId;
     }
 
-    public void setCid(String cid) {
-        this.cid = cid;
+    public void setcId(String cId) {
+        this.cId = cId;
     }
 
     public String getComment() {
@@ -71,13 +66,23 @@ String cid;
         this.uname = uname;
     }
 
+    String uemail;
+
     public ModelComment() {
     }
 
-    String ptime;
-    String udp;
-    String uemail;
     String uid;
+
+    public ModelComment(String cId, String comment, String ptime, String udp, String uemail, String uid, String uname) {
+        this.cId = cId;
+        this.comment = comment;
+        this.ptime = ptime;
+        this.udp = udp;
+        this.uemail = uemail;
+        this.uid = uid;
+        this.uname = uname;
+    }
+
     String uname;
 
 }

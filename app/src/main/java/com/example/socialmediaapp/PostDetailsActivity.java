@@ -133,7 +133,7 @@ public class PostDetailsActivity extends AppCompatActivity {
                 for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
                     ModelComment modelComment=dataSnapshot1.getValue(ModelComment.class);
                     commentList.add(modelComment);
-                    adapterComment=new AdapterComment(getApplicationContext(),commentList);
+                    adapterComment=new AdapterComment(getApplicationContext(),commentList,myuid,postId);
                     recyclerView.setAdapter(adapterComment);
                 }
             }
