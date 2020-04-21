@@ -78,19 +78,20 @@ public class ChatActivity extends AppCompatActivity {
         toolbar=findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle("");
+        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
         recyclerView=findViewById(R.id.chatrecycle);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        uid=getIntent().getStringExtra("uid");
+        firebaseDatabase=FirebaseDatabase.getInstance();
         profile=findViewById(R.id.profiletv);
         name=findViewById(R.id.nameptv);
         userstatus=findViewById(R.id.onlinetv);
         msg=findViewById(R.id.messaget);
         send=findViewById(R.id.sendmsg);
+        checkUserStatus();
 
-        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
-        linearLayoutManager.setStackFromEnd(true);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        uid=getIntent().getStringExtra("uid");
-        firebaseDatabase=FirebaseDatabase.getInstance();
         users=firebaseDatabase.getReference("Users");
         apiService=Client.getRetrofit("https://fcm.googleapis.com/").create(APIService.class);
         Query userquery=users.orderByChild("uid").equalTo(uid);
@@ -231,7 +232,37 @@ public class ChatActivity extends AppCompatActivity {
         checkOnlineStatus("online");
         super.onStart();
     }
+    private void readMessages() {
 
+        chatList=new ArrayList<>();
+        DatabaseReference dbref=FirebaseDatabase.getInstance().getReference().child("Chats");
+        dbref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                chatList.clear();
+                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                    ModelChat modelChat=dataSnapshot1.getValue(ModelChat.class);
+                    if(modelChat.getSender().equals(myuid)&&
+                            modelChat.getReceiver().equals(uid)||
+                            modelChat.getReceiver().equals(myuid)
+                                    && modelChat.getSender().equals(uid)){
+                        chatList.add(modelChat);
+                    }
+                    adapterChat=new AdapterChat(ChatActivity.this,chatList,image);
+                    adapterChat.notifyDataSetChanged();
+                    recyclerView.setAdapter(adapterChat);
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
     private void sendmessage(final String message) {
 
         DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
@@ -255,6 +286,36 @@ public class ChatActivity extends AppCompatActivity {
                     sendNotification(uid,modelUsers.getName(),message);
                 }
                 notify=false;
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        final DatabaseReference ref1=FirebaseDatabase.getInstance().getReference("ChatList").child(uid).child(myuid);
+        ref1.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if(!dataSnapshot.exists()){
+                    ref1.child("id").setValue(uid);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        final DatabaseReference ref2=FirebaseDatabase.getInstance().getReference("ChatList").child(myuid).child(uid);
+        ref2.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if(!dataSnapshot.exists()){
+                    ref2.child("id").setValue(myuid);
+                }
             }
 
             @Override
@@ -295,35 +356,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void readMessages() {
 
-        chatList=new ArrayList<>();
-        DatabaseReference dbref=FirebaseDatabase.getInstance().getReference().child("Chats");
-        dbref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                chatList.clear();
-                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
-                    ModelChat modelChat=dataSnapshot1.getValue(ModelChat.class);
-                    if(modelChat.getReceiver().equals(myuid)&& modelChat.getSender().equals(uid)||
-                            modelChat.getReceiver().equals(uid)&&modelChat.getSender().equals(myuid)){
-                        chatList.add(modelChat);
-                    }
-                    adapterChat=new AdapterChat(ChatActivity.this,chatList,image);
-                    adapterChat.notifyDataSetChanged();
-                    recyclerView.setAdapter(adapterChat);
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
 
     private void checkUserStatus(){
         FirebaseUser user=firebaseAuth.getCurrentUser();

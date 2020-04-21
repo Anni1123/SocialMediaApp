@@ -4,14 +4,6 @@ public class ModelChat {
     String message;
 
 
-    String receiver;
-
-    public ModelChat() {
-    }
-
-    String sender;
-    String timestamp;
-
     public String getMessage() {
         return message;
     }
@@ -52,6 +44,13 @@ public class ModelChat {
         this.dilihat = dilihat;
     }
 
+    String receiver;
+
+    public ModelChat() {
+    }
+
+    String sender;
+
     public ModelChat(String message, String receiver, String sender, String timestamp, boolean dilihat) {
         this.message = message;
         this.receiver = receiver;
@@ -59,6 +58,9 @@ public class ModelChat {
         this.timestamp = timestamp;
         this.dilihat = dilihat;
     }
+
+    String timestamp;
+
 
     boolean dilihat;
 }

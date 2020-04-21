@@ -3,15 +3,34 @@ package com.example.socialmediaapp.models;
 public class ModelUsers {
     String name;
 
+    public ModelUsers() {
+    }
+
+    String onlineStatus;
+    String typingTo;
+
     public String getName() {
         return name;
     }
 
-    public ModelUsers() {
-    }
-
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getOnlineStatus() {
+        return onlineStatus;
+    }
+
+    public void setOnlineStatus(String onlineStatus) {
+        this.onlineStatus = onlineStatus;
+    }
+
+    public String getTypingTo() {
+        return typingTo;
+    }
+
+    public void setTypingTo(String typingTo) {
+        this.typingTo = typingTo;
     }
 
     public String getEmail() {
@@ -56,8 +75,14 @@ public class ModelUsers {
 
     String email;
 
-    public ModelUsers(String name, String email, String image, String cover, String phone, String uid) {
+
+    String image;
+    String cover;
+
+    public ModelUsers(String name, String onlineStatus, String typingTo, String email, String image, String cover, String phone, String uid) {
         this.name = name;
+        this.onlineStatus = onlineStatus;
+        this.typingTo = typingTo;
         this.email = email;
         this.image = image;
         this.cover = cover;
@@ -65,8 +90,6 @@ public class ModelUsers {
         this.uid = uid;
     }
 
-    String image;
-    String cover;
     String phone;
     String uid;
 }
