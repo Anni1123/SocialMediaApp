@@ -12,23 +12,24 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.socialmediaapp.adapters.AdapterChat;
 import com.example.socialmediaapp.models.ModelChat;
 import com.example.socialmediaapp.models.ModelUsers;
-import com.example.socialmediaapp.notifications.APIService;
-import com.example.socialmediaapp.notifications.Client;
 import com.example.socialmediaapp.notifications.Data;
-import com.example.socialmediaapp.notifications.Response;
 import com.example.socialmediaapp.notifications.Sender;
 import com.example.socialmediaapp.notifications.Token;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,16 +40,19 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 
-import retrofit2.Call;
-import retrofit2.Callback;
+
 
 public class ChatActivity extends AppCompatActivity {
     Toolbar toolbar;
@@ -66,9 +70,7 @@ public class ChatActivity extends AppCompatActivity {
 
     FirebaseDatabase firebaseDatabase;
     DatabaseReference users;
-
-
-    APIService apiService;
+    private RequestQueue requestQueue;
     boolean notify=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,22 +80,23 @@ public class ChatActivity extends AppCompatActivity {
         toolbar=findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle("");
-        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
-        linearLayoutManager.setStackFromEnd(true);
-        recyclerView=findViewById(R.id.chatrecycle);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        uid=getIntent().getStringExtra("uid");
-        firebaseDatabase=FirebaseDatabase.getInstance();
         profile=findViewById(R.id.profiletv);
         name=findViewById(R.id.nameptv);
         userstatus=findViewById(R.id.onlinetv);
         msg=findViewById(R.id.messaget);
         send=findViewById(R.id.sendmsg);
-        checkUserStatus();
+        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        recyclerView=findViewById(R.id.chatrecycle);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        requestQueue= Volley.newRequestQueue(getApplicationContext());
+        uid=getIntent().getStringExtra("uid");
+        firebaseDatabase=FirebaseDatabase.getInstance();
 
+        checkUserStatus();
         users=firebaseDatabase.getReference("Users");
-        apiService=Client.getRetrofit("https://fcm.googleapis.com/").create(APIService.class);
+
         Query userquery=users.orderByChild("uid").equalTo(uid);
         userquery.addValueEventListener(new ValueEventListener() {
             @Override
@@ -333,19 +336,37 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
                     Token token=dataSnapshot1.getValue(Token.class);
-                    Data data=new Data(myuid,name + ":" + message,"New Message",uid,R.drawable.profile_image);
+                    Data data=new Data(myuid,name + ": " + message,"New Message",uid,R.drawable.profile_image);
                     Sender sender=new Sender(data,token.getToken());
-                    apiService.sendNotification(sender).enqueue(new Callback<Response>() {
-                        @Override
-                        public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                   try {
+                       JSONObject jsonObject = new JSONObject(new Gson().toJson(sender));
+                       JsonObjectRequest objectRequest =new JsonObjectRequest("https://fcm.googleapis.com/fcm/send", jsonObject, new Response.Listener<JSONObject>() {
+                           @Override
+                           public void onResponse(JSONObject response) {
 
-                        }
+                               Log.d("JSON_RESPONSE","onResponse: " +response.toString());
+                           }
+                       }, new Response.ErrorListener() {
+                           @Override
+                           public void onErrorResponse(VolleyError error) {
+                               Log.d("JSON_RESPONSE","onResponse: " +error.toString());
 
-                        @Override
-                        public void onFailure(Call<Response> call, Throwable t) {
+                           }
+                       }) {
+                           @Override
+                           public Map<String, String> getHeaders() throws AuthFailureError {
+                               Map<String ,String > map=new HashMap<>();
+                               map.put("Content-Type","application/json");
+                               map.put("Authorization","key=AAAAux-y-Cc:APA91bFXuXd6jvnnZ2ZC3kGL4tEfkug7ruuxI1HrDimSboYCAL0ZrdxZnCD0y949pW6Xf15n28iDe3H7GesRtmqvOlh60XNLGVkgaCYcYjYeC3Gmg2UXJtzo5GK3ws9FTRh6FQqVp5r5");
 
-                        }
-                    });
+                               return map;
+                           }
+                       };
+                       requestQueue.add(objectRequest);
+                   }catch (JSONException e){
+
+                       e.printStackTrace();
+                   }
                 }
             }
 

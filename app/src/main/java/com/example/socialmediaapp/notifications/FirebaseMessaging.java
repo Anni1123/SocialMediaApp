@@ -18,6 +18,8 @@ import com.example.socialmediaapp.ChatActivity;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -95,6 +97,23 @@ public class FirebaseMessaging extends FirebaseMessagingService {
         }
         notificationManager.notify(j,builder.build());
 
+
+    }
+
+    @Override
+    public void onNewToken(@NonNull String s) {
+        super.onNewToken(s);
+        FirebaseUser firebaseUser=FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser!=null){
+            updateToken(s);
+        }
+    }
+
+    private void updateToken(String token) {
+        FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Tokens");
+        Token tokena=new Token(token);
+        reference.child(user.getUid()).setValue(tokena);
 
     }
 }
