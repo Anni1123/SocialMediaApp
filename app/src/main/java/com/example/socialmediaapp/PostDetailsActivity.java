@@ -3,6 +3,8 @@ package com.example.socialmediaapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -22,6 +24,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.socialmediaapp.adapters.AdapterComment;
+import com.example.socialmediaapp.models.ModelComment;
 import com.example.socialmediaapp.notifications.Data;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -37,8 +41,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 public class PostDetailsActivity extends AppCompatActivity {
@@ -53,6 +59,9 @@ public class PostDetailsActivity extends AppCompatActivity {
     LinearLayout profile;
     EditText comment;
     ImageButton sendb;
+    RecyclerView recyclerView;
+    List<ModelComment> commentList;
+    AdapterComment adapterComment;
     ImageView imagep;
     boolean mlike=false;
     ActionBar actionBar;
@@ -66,6 +75,7 @@ public class PostDetailsActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowHomeEnabled(true);
         postId=getIntent().getStringExtra("pid");
+        recyclerView=findViewById(R.id.recyclecomment);
         picture=findViewById(R.id.pictureco);
         image=findViewById(R.id.pimagetvco);
         name=findViewById(R.id.unameco);
@@ -87,6 +97,7 @@ public class PostDetailsActivity extends AppCompatActivity {
         loadUserInfo();
         setLikes();
         actionBar.setSubtitle("SignedInAs:" +myemail);
+        loadComments();
         sendb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -106,6 +117,32 @@ public class PostDetailsActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void loadComments() {
+
+        LinearLayoutManager layoutManager=new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(layoutManager);
+        commentList=new ArrayList<>();
+        DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Posts").child(postId).child("Comments");
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                commentList.clear();
+                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                    ModelComment modelComment=dataSnapshot1.getValue(ModelComment.class);
+                    commentList.add(modelComment);
+                    adapterComment=new AdapterComment(getApplicationContext(),commentList);
+                    recyclerView.setAdapter(adapterComment);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void showmoreoptions() {
