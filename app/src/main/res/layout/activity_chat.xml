@@ -12,6 +12,10 @@
         android:id="@+id/toolbar"
         android:background="@color/colorPrimaryDark"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="35dp"
             android:layout_height="35dp"
@@ -20,7 +24,8 @@
             android:src="@drawable/profile_image"
            app:civ_circle_background_color="@color/colorPrimaryDark"/>
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginStart="20dp"
@@ -28,6 +33,7 @@
             android:layout_marginLeft="20dp">
             <TextView
                 android:layout_width="match_parent"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="HisName"
                 android:textColor="@color/colorWhite"
@@ -42,6 +48,14 @@
                 android:textColor="@color/colorWhite"
                 android:id="@+id/onlinetv"/>
 
+        </LinearLayout>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:id="@+id/block"
+                android:layout_marginEnd="5dp"
+                android:src="@drawable/ic_unblock"/>
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
     <androidx.recyclerview.widget.RecyclerView

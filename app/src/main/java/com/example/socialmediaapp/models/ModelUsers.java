@@ -2,6 +2,7 @@ package com.example.socialmediaapp.models;
 
 public class ModelUsers {
     String name;
+    boolean isBlocked;
 
     public ModelUsers() {
     }
@@ -35,6 +36,14 @@ public class ModelUsers {
 
     public String getEmail() {
         return email;
+    }
+
+    public boolean isBlocked() {
+        return isBlocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        isBlocked = blocked;
     }
 
     public void setEmail(String email) {
@@ -73,14 +82,9 @@ public class ModelUsers {
         this.uid = uid;
     }
 
-    String email;
-
-
-    String image;
-    String cover;
-
-    public ModelUsers(String name, String onlineStatus, String typingTo, String email, String image, String cover, String phone, String uid) {
+    public ModelUsers(String name, boolean isBlocked, String onlineStatus, String typingTo, String email, String image, String cover, String phone, String uid) {
         this.name = name;
+        this.isBlocked = isBlocked;
         this.onlineStatus = onlineStatus;
         this.typingTo = typingTo;
         this.email = email;
@@ -89,6 +93,13 @@ public class ModelUsers {
         this.phone = phone;
         this.uid = uid;
     }
+
+    String email;
+
+
+    String image;
+    String cover;
+
 
     String phone;
     String uid;

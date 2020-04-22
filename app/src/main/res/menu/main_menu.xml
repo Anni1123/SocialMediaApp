@@ -9,6 +9,12 @@
 
     </item>
     <item
+        android:id="@+id/settings"
+        android:title="Setting"
+        >
+
+    </item>
+    <item
         android:id="@+id/search"
         app:showAsAction="always"
         android:title="Search"

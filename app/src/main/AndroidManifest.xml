@@ -14,13 +14,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".PostDetailsActivity"></activity>
+        <activity android:name=".SettingsActivity"></activity>
+        <activity android:name=".PostDetailsActivity" />
         <activity android:name=".ThereProfileActivity" />
         <activity
             android:name=".AddPostActivity"
             android:parentActivityName=".DashboardActivity" />
         <activity
             android:name=".ChatActivity"
+            android:parentActivityName=".DashboardActivity"
             android:theme="@style/AppThemeNo" />
         <activity android:name=".DashboardActivity">
             <intent-filter>
@@ -41,16 +43,16 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
         <provider
-            android:authorities="com.example.socialmediaapp.fileprovider"
             android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.socialmediaapp.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/paths"/>
+                android:resource="@xml/paths" />
         </provider>
     </application>
-
 
 </manifest>

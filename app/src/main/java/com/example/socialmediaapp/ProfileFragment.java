@@ -598,8 +598,11 @@ public class ProfileFragment extends Fragment {
             firebaseAuth.signOut();
             checkUserStatus();
         }
-        if(item.getItemId()==R.id.add){
+        else if(item.getItemId()==R.id.add){
             startActivity(new Intent(getActivity(),AddPostActivity.class));
+        }
+        else if(item.getItemId()==R.id.settings){
+            startActivity(new Intent(getActivity(),SettingsActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }

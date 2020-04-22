@@ -184,6 +184,9 @@ public class ChatListFragment extends Fragment {
             firebaseAuth.signOut();
             checkUserStatus();
         }
+        else if(item.getItemId()==R.id.settings){
+            startActivity(new Intent(getActivity(),SettingsActivity.class));
+        }
 
         return super.onOptionsItemSelected(item);
     }

@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +29,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.socialmediaapp.models.ModelUsers;
 import com.example.socialmediaapp.notifications.Data;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -46,8 +52,12 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 public class AddPostActivity extends AppCompatActivity {
 
@@ -128,8 +138,8 @@ public class AddPostActivity extends AppCompatActivity {
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String titl = title.getText().toString().trim();
-                String description = des.getText().toString().trim();
+                String titl = ""+title.getText().toString().trim();
+                String description = ""+des.getText().toString().trim();
                 if (TextUtils.isEmpty(titl)) {
                     Toast.makeText(AddPostActivity.this, "Title cant be empty", Toast.LENGTH_LONG).show();
                     return;
@@ -383,6 +393,51 @@ public class AddPostActivity extends AppCompatActivity {
             }
         });
     }
+    private void prepareNotification(String pId,String title,String description,String notificationtype,String notificationtopic) throws JSONException {
+
+        String NOTIFICATION_TOPIC="/topics/" + notificationtopic;
+        String NOTIFICATION_TILE=title;
+        String NOTIFICATION_ESSAGE=description;
+        String NOTIFICATION_TYPE=notificationtype;
+
+        JSONObject object=new JSONObject();
+        JSONObject notificationObject=new JSONObject();
+        notificationObject.put("notificationType",NOTIFICATION_TYPE);
+        notificationObject.put("sender",uid);
+        notificationObject.put("pId",pId);
+        notificationObject.put("pTitle",NOTIFICATION_TILE);
+        notificationObject.put("pDescription",NOTIFICATION_ESSAGE);
+        object.put("to",NOTIFICATION_TOPIC);
+        object.put("data",notificationObject);
+
+        sendNotification(object);
+    }
+
+    private void sendNotification(JSONObject object) {
+        JsonObjectRequest jsonObjectRequest=new JsonObjectRequest("https://fcm.googleapis.com/fcm/send", object, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d("FCM_RESPONSE","onResponse:"+response.toString());
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(AddPostActivity.this,""+error.getMessage(),Toast.LENGTH_LONG).show();
+            }
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String ,String > map=new HashMap<>();
+                map.put("Content-Type","application/json");
+                map.put("Authorization","key=AAAAux-y-Cc:APA91bFXuXd6jvnnZ2ZC3kGL4tEfkug7ruuxI1HrDimSboYCAL0ZrdxZnCD0y949pW6Xf15n28iDe3H7GesRtmqvOlh60XNLGVkgaCYcYjYeC3Gmg2UXJtzo5GK3ws9FTRh6FQqVp5r5");
+
+                return map;
+            }
+        };
+        Volley.newRequestQueue(this).add(jsonObjectRequest);
+    }
 
     private void checkUserStatus(){
         FirebaseUser user=firebaseAuth.getCurrentUser();
@@ -440,6 +495,17 @@ public class AddPostActivity extends AppCompatActivity {
                                         des.setText("");
                                         image.setImageURI(null);
                                         imageuri=null;
+                                        try {
+                                            prepareNotification(
+                                                    ""+timestamp
+                                            ,""+name+" added new post ",
+                                                    ""+titl+"\n"+description,
+                                                    "POST_NOTIFICATION",
+                                                    "POST");
+
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
                                         startActivity(new Intent(AddPostActivity.this,DashboardActivity.class));
                                         finish();
                                     }
@@ -487,6 +553,15 @@ public class AddPostActivity extends AppCompatActivity {
                                 des.setText("");
                                 image.setImageURI(null);
                                 imageuri=null;
+                                try {
+                                    prepareNotification(
+                                            ""+timestamp
+                                            ,""+name+" added new post ",
+                                            ""+titl+ "\n" + des ,
+                                            "POST_NOTIFICATION","POST");
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
                                 startActivity(new Intent(AddPostActivity.this,DashboardActivity.class));
                                 finish();
                             }
@@ -501,9 +576,6 @@ public class AddPostActivity extends AppCompatActivity {
             }
 
         }
-
-
-
 
     private Boolean checkStoragePermission(){
         boolean result= ContextCompat.checkSelfPermission(AddPostActivity.this,Manifest.permission.WRITE_EXTERNAL_STORAGE)

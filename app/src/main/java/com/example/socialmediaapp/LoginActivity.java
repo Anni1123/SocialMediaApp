@@ -111,6 +111,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void beginRecovery(String emaill) {
         loadingBar.setMessage("Sending Email....");
+        loadingBar.setCanceledOnTouchOutside(false);
         loadingBar.show();
         mAuth.sendPasswordResetEmail(emaill).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

@@ -2,6 +2,7 @@ package com.example.socialmediaapp;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -76,7 +77,7 @@ import java.util.Map;
 public class ChatActivity extends AppCompatActivity {
     Toolbar toolbar;
     RecyclerView recyclerView;
-    ImageView profile;
+    ImageView profile,block;
     TextView name,userstatus;
     EditText msg;
     ImageButton send,attach;
@@ -98,6 +99,7 @@ public class ChatActivity extends AppCompatActivity {
     DatabaseReference users;
     private RequestQueue requestQueue;
     boolean notify=false;
+    boolean isBlocked=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,6 +107,9 @@ public class ChatActivity extends AppCompatActivity {
         firebaseAuth=FirebaseAuth.getInstance();
         toolbar=findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        ActionBar actionBar=getSupportActionBar();
+        actionBar.setDisplayShowHomeEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
         toolbar.setTitle("");
         profile=findViewById(R.id.profiletv);
         name=findViewById(R.id.nameptv);
@@ -112,6 +117,7 @@ public class ChatActivity extends AppCompatActivity {
         msg=findViewById(R.id.messaget);
         send=findViewById(R.id.sendmsg);
         attach=findViewById(R.id.attachbtn);
+        block=findViewById(R.id.block);
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         recyclerView=findViewById(R.id.chatrecycle);
@@ -185,10 +191,96 @@ public class ChatActivity extends AppCompatActivity {
             }
 
         });
+        block.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(isBlocked){
+                    unBlockUser();
+                }
+                else {
+                    blockUser();
+                }
+            }
+        });
         readMessages();
+        checkisBlocked();
         seenMessgae();
     }
 
+    private void checkisBlocked() {
+        DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
+        reference.child(uid).child("BlockUsers").orderByChild("uid").equalTo(uid)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                            if(dataSnapshot1.exists()) {
+
+                               block.setImageResource(R.drawable.ic_block);
+                               isBlocked=true;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
+    private void blockUser() {
+        HashMap<String,String> hashMap=new HashMap<>();
+        hashMap.put("uid",uid);
+        DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
+        reference.child(uid).child("BlockUsers").child(uid).setValue(hashMap)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(ChatActivity.this,"Blocked Users",Toast.LENGTH_LONG).show();
+                        block.setImageResource(R.drawable.ic_block);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(ChatActivity.this,"Failed",Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void unBlockUser() {
+
+        DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
+        reference.child(uid).child("BlockUsers").orderByChild("uid")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                            if(dataSnapshot1.exists()){
+                                dataSnapshot1.getRef().removeValue()
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Toast.makeText(ChatActivity.this,"UnBlocked Users",Toast.LENGTH_LONG).show();
+                                                block.setImageResource(R.drawable.ic_unblock);
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(ChatActivity.this,"Failed",Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+    }
     private void seenMessgae() {
         userforseen=FirebaseDatabase.getInstance().getReference("Chats");
         valueEventListener=userforseen.addValueEventListener(new ValueEventListener() {
@@ -248,6 +340,12 @@ public class ChatActivity extends AppCompatActivity {
     protected void onResume() {
         checkOnlineStatus("online");
         super.onResume();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
     }
 
     private void checkOnlineStatus(String status){
@@ -569,7 +667,13 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
                     Token token=dataSnapshot1.getValue(Token.class);
-                    Data data=new Data(myuid,name + ": " + message,"New Message",uid,R.drawable.profile_image);
+                    Data data=new Data(
+                            ""+myuid,
+                            "ChatNotification",
+                            ""+name + ": " + message,
+                            "New Message",
+                            ""+uid
+                    ,R.drawable.profile_image);
                     Sender sender=new Sender(data,token.getToken());
                    try {
                        JSONObject jsonObject = new JSONObject(new Gson().toJson(sender));

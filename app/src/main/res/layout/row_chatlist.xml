@@ -7,7 +7,9 @@
     app:contentPadding="3dp">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+
+        >
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="70dp"
@@ -39,7 +41,13 @@
             android:textColor="@color/colorBlack"
             android:layout_toEndOf="@id/profileimage"
             android:layout_toRightOf="@id/profileimage"/>
-
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/blocking"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_unblock"/>
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>
