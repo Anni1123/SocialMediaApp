@@ -302,7 +302,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 if(!dataSnapshot.exists()){
-                    ref1.child("id").setValue(uid);
+                    ref1.child("id").setValue(myuid);
                 }
             }
 
@@ -317,7 +317,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 if(!dataSnapshot.exists()){
-                    ref2.child("id").setValue(myuid);
+                    ref2.child("id").setValue(uid);
                 }
             }
 
