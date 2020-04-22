@@ -141,7 +141,7 @@ public class AdapterChatList extends RecyclerView.Adapter<AdapterChatList.Myhold
     private void unBlockUser(String hisuid) {
 
         DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
-        reference.child(uid).child("BlockUsers").orderByChild("uid")
+        reference.child(uid).child("BlockUsers").orderByChild("uid").equalTo(hisuid)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
