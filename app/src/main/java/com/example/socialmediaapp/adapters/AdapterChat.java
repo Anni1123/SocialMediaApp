@@ -7,6 +7,7 @@ import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,6 +66,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.Myholder>{
 
         String message=list.get(position).getMessage();
         String timeStamp=list.get(position).getTimestamp();
+        String type=list.get(position).getType();
         Calendar calendar=Calendar.getInstance(Locale.ENGLISH);
         calendar.setTimeInMillis(Long.parseLong(timeStamp));
         String timedate= DateFormat.format("dd/MM/yyyy hh:mm aa",calendar).toString();
@@ -75,6 +77,16 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.Myholder>{
         }
         catch (Exception e){
 
+        }
+        if(type.equals("text")){
+            holder.message.setVisibility(View.VISIBLE);
+            holder.mimage.setVisibility(View.GONE);
+            holder.message.setText(message);
+        }
+        else {
+            holder.message.setVisibility(View.GONE);
+            holder.mimage.setVisibility(View.VISIBLE);
+            Picasso.with(context).load(message).into(holder.mimage);
         }
 
         holder.msglayput.setOnClickListener(new View.OnClickListener() {
@@ -160,6 +172,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.Myholder>{
     class Myholder extends RecyclerView.ViewHolder{
 
         CircleImageView image;
+        ImageView mimage;
         TextView message,time,isSee;
         LinearLayout msglayput;
         public Myholder(@NonNull View itemView) {
@@ -169,6 +182,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.Myholder>{
             time=itemView.findViewById(R.id.timetv);
             isSee=itemView.findViewById(R.id.isSeen);
             msglayput=itemView.findViewById(R.id.msglayout);
+            mimage=itemView.findViewById(R.id.images);
         }
     }
 }

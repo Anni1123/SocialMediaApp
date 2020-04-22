@@ -51,13 +51,25 @@ public class ModelChat {
 
     String sender;
 
-    public ModelChat(String message, String receiver, String sender, String timestamp, boolean dilihat) {
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public ModelChat(String message, String receiver, String sender, String type, String timestamp, boolean dilihat) {
         this.message = message;
         this.receiver = receiver;
         this.sender = sender;
+        this.type = type;
         this.timestamp = timestamp;
         this.dilihat = dilihat;
     }
+
+    String type;
+
 
     String timestamp;
 

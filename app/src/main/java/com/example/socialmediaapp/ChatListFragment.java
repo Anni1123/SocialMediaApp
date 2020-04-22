@@ -141,7 +141,12 @@ public class ChatListFragment extends Fragment {
                    chat.getSender().equals(uid)||
                    chat.getReceiver().equals(uid)&&
                     chat.getSender().equals(firebaseUser.getUid())){
-                       lastmess=chat.getMessage();
+                       if(chat.getType().equals("images")){
+                           lastmess="Sent a Photo";
+                       }
+                       else {
+                           lastmess = chat.getMessage();
+                       }
                    }
 
                }

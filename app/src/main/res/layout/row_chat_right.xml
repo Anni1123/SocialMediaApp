@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="10dp">
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -28,14 +28,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/msgc"
-            android:layout_weight="1"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@id/timetv"
             android:textSize="16sp"
             android:textColor="@color/colorBlack"
             android:background="@drawable/bg_sender"
             android:padding="15dp"
             android:text="His Message"/>
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:id="@+id/images"
+            android:adjustViewBounds="true"
+            android:padding="15dp"
+            android:src="@drawable/ic_images"
+            android:scaleType="fitCenter"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/bg_sender"/>
 
-    </LinearLayout>
+    </RelativeLayout>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

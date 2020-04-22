@@ -1,13 +1,24 @@
 package com.example.socialmediaapp;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -32,6 +43,9 @@ import com.example.socialmediaapp.models.ModelUsers;
 import com.example.socialmediaapp.notifications.Data;
 import com.example.socialmediaapp.notifications.Sender;
 import com.example.socialmediaapp.notifications.Token;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -40,12 +54,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -60,7 +79,7 @@ public class ChatActivity extends AppCompatActivity {
     ImageView profile;
     TextView name,userstatus;
     EditText msg;
-    ImageButton send;
+    ImageButton send,attach;
     FirebaseAuth firebaseAuth;
     String uid,myuid,image;
     ValueEventListener valueEventListener;
@@ -68,6 +87,13 @@ public class ChatActivity extends AppCompatActivity {
     List<ModelChat> chatList;
     AdapterChat adapterChat;
 
+    private static final int IMAGEPICK_GALLERY_REQUEST = 300;
+    private static final int IMAGE_PICKCAMERA_REQUEST = 400;
+    private static final int CAMERA_REQUEST = 100;
+    private static final int STORAGE_REQUEST = 200;
+    String cameraPermission[];
+    String storagePermission[];
+    Uri imageuri = null;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference users;
     private RequestQueue requestQueue;
@@ -85,6 +111,7 @@ public class ChatActivity extends AppCompatActivity {
         userstatus=findViewById(R.id.onlinetv);
         msg=findViewById(R.id.messaget);
         send=findViewById(R.id.sendmsg);
+        attach=findViewById(R.id.attachbtn);
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         recyclerView=findViewById(R.id.chatrecycle);
@@ -93,6 +120,8 @@ public class ChatActivity extends AppCompatActivity {
         requestQueue= Volley.newRequestQueue(getApplicationContext());
         uid=getIntent().getStringExtra("uid");
         firebaseDatabase=FirebaseDatabase.getInstance();
+        cameraPermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         checkUserStatus();
         users=firebaseDatabase.getReference("Users");
@@ -132,6 +161,12 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
+            }
+        });
+        attach.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showImagePicDialog();
             }
         });
         send.setOnClickListener(new View.OnClickListener() {
@@ -266,6 +301,206 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+    private void showImagePicDialog() {
+        String options[]={ "Camera","Gallery"};
+        AlertDialog.Builder builder=new AlertDialog.Builder(ChatActivity.this);
+        builder.setTitle("Pick Image From");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                if(which==0){
+                    if(!checkCameraPermission()){
+                        requestCameraPermission();
+                    }
+                    else {
+                        pickFromCamera();
+                    }
+                }else if(which==1){
+                    if(!checkStoragePermission()){
+                        requestStoragePermission();
+                    }
+                    else {
+                        pickFromGallery();
+                    }
+
+                }
+            }
+        });
+        builder.create().show();
+    }
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode){
+            case CAMERA_REQUEST:{
+                if(grantResults.length>0){
+                    boolean camera_accepted=grantResults[0]==PackageManager.PERMISSION_GRANTED;
+                    boolean writeStorageaccepted=grantResults[1]==PackageManager.PERMISSION_GRANTED;
+                    if(camera_accepted&&writeStorageaccepted){
+                        pickFromCamera();
+                    }
+                    else {
+                        Toast.makeText(this,"Please Enable Camera and Storage Permissions",Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+            break;
+            case STORAGE_REQUEST:{
+                if(grantResults.length>0){
+                    boolean writeStorageaccepted=grantResults[0]==PackageManager.PERMISSION_GRANTED;
+                    if(writeStorageaccepted){
+                        pickFromGallery();
+                    }
+                    else {
+                        Toast.makeText(this,"Please Enable Storage Permissions",Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+            break;
+        }
+
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(resultCode == RESULT_OK){
+            if(requestCode==IMAGEPICK_GALLERY_REQUEST){
+                imageuri=data.getData();
+                try {
+                    sendImageMessage(imageuri);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(requestCode==IMAGE_PICKCAMERA_REQUEST){
+                try {
+                    sendImageMessage(imageuri);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void sendImageMessage(Uri imageuri) throws IOException {
+        notify=true;
+        final ProgressDialog dialog=new ProgressDialog(this);
+        dialog.setMessage("Sending Image");
+        dialog.show();
+
+        final String timestamp=""+System.currentTimeMillis();
+        String filepathandname="ChatImages/"+"post"+timestamp;
+        Bitmap bitmap=MediaStore.Images.Media.getBitmap(this.getContentResolver(),imageuri);
+        ByteArrayOutputStream arrayOutputStream=new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG,100,arrayOutputStream);
+        final byte[] data=arrayOutputStream.toByteArray();
+        StorageReference ref= FirebaseStorage.getInstance().getReference().child(filepathandname);
+        ref.putBytes(data).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                dialog.dismiss();
+                Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                while (!uriTask.isSuccessful()) ;
+                String downloadUri = uriTask.getResult().toString();
+
+                if(uriTask.isSuccessful()){
+                    DatabaseReference re=FirebaseDatabase.getInstance().getReference();
+                    HashMap<String,Object> hashMap=new HashMap<>();
+                    hashMap.put("sender",myuid);
+                    hashMap.put("receiver",uid);
+                    hashMap.put("message",downloadUri);
+                    hashMap.put("timestamp",timestamp);
+                    hashMap.put("dilihat",false);
+                    hashMap.put("type","images");
+                    re.child("Chats").push().setValue(hashMap);
+                    DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Users").child(myuid);
+                    reference.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                          ModelUsers users=dataSnapshot.getValue(ModelUsers.class);
+                          if(notify){
+                              sendNotification(uid,users.getName(),"Sent You a Photo");
+                          }
+                          notify=false;
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                    final DatabaseReference ref1=FirebaseDatabase.getInstance().getReference("ChatList").child(uid).child(myuid);
+                    ref1.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                            if(!dataSnapshot.exists()){
+                                ref1.child("id").setValue(myuid);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                    final DatabaseReference ref2=FirebaseDatabase.getInstance().getReference("ChatList").child(myuid).child(uid);
+                    ref2.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                            if(!dataSnapshot.exists()){
+                                ref2.child("id").setValue(uid);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+    }
+
+    private Boolean checkCameraPermission(){
+        boolean result= ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)
+                ==(PackageManager.PERMISSION_GRANTED);
+        boolean result1= ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                ==(PackageManager.PERMISSION_GRANTED);
+        return result && result1;
+    }
+    private void requestCameraPermission(){
+        requestPermissions(cameraPermission,CAMERA_REQUEST);
+    }
+    private void pickFromCamera(){
+        ContentValues contentValues=new ContentValues();
+        contentValues.put(MediaStore.Images.Media.TITLE,"Temp_pic");
+        contentValues.put(MediaStore.Images.Media.DESCRIPTION,"Temp Description");
+        imageuri=this.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,contentValues);
+        Intent camerIntent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        camerIntent.putExtra(MediaStore.EXTRA_OUTPUT,imageuri);
+        startActivityForResult(camerIntent,IMAGE_PICKCAMERA_REQUEST);
+    }
+    private void pickFromGallery(){
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK);
+        galleryIntent.setType("image/*");
+        startActivityForResult(galleryIntent, IMAGEPICK_GALLERY_REQUEST);
+    }
+    private Boolean checkStoragePermission(){
+        boolean result= ContextCompat.checkSelfPermission(ChatActivity.this,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                ==(PackageManager.PERMISSION_GRANTED);
+        return result;
+    }
+    private void requestStoragePermission(){
+        requestPermissions(storagePermission,STORAGE_REQUEST);
+    }
     private void sendmessage(final String message) {
 
         DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
@@ -276,10 +511,8 @@ public class ChatActivity extends AppCompatActivity {
         hashMap.put("message",message);
         hashMap.put("timestamp",timestamp);
         hashMap.put("dilihat",false);
+        hashMap.put("type","text");
         databaseReference.child("Chats").push().setValue(hashMap);
-
-
-        String msg=message;
         DatabaseReference databaseReference1=FirebaseDatabase.getInstance().getReference("Users").child(myuid);
         databaseReference1.addValueEventListener(new ValueEventListener() {
             @Override

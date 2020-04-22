@@ -58,6 +58,13 @@
         android:gravity="center"
         android:orientation="horizontal"
         android:background="@color/colorWhite">
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/attachbtn"
+            android:src="@drawable/ic_iattach"
+            android:background="@null"/>
+
         <EditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"
