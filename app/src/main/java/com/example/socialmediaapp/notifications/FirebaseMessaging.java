@@ -32,6 +32,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.Random;
 
 public class FirebaseMessaging extends FirebaseMessagingService {
+
     private static final String ADMIN_CHANNEL_ID ="admin_channel" ;
 
     @Override
@@ -70,7 +71,7 @@ public class FirebaseMessaging extends FirebaseMessagingService {
 
     }
 
-    private void showPostNotification(String pid, String ptitle, String pdescription) {
+    private void showPostNotification(String pid, String title, String description) {
 
         NotificationManager notificationManager=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         int notificationId=new Random().nextInt(3000);
@@ -87,8 +88,8 @@ public class FirebaseMessaging extends FirebaseMessagingService {
         NotificationCompat.Builder builder=new NotificationCompat.Builder(this,""+ADMIN_CHANNEL_ID)
                 .setSmallIcon(R.drawable.profile_image)
                 .setLargeIcon(largeIcon)
-                .setContentTitle(ptitle)
-                .setContentText(pdescription)
+                .setContentTitle(title)
+                .setContentText(description)
                 .setSound(notificationUri)
                 .setContentIntent(intent1);
         notificationManager.notify(notificationId,builder.build());

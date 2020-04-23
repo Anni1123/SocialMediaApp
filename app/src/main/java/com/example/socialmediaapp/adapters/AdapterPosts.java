@@ -250,6 +250,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
 
     }
 
+
     private void showMoreOptions(ImageButton more, String uid, String myuid,final String pid,final String image) {
 
         PopupMenu popupMenu=new PopupMenu(context,more, Gravity.END);
@@ -285,10 +286,28 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
 
         if(image.equals("noImage")){
             deleteWithoutImage(pid);
+            deletelike(pid);
         }
         else {
             deltewithImage(pid,image);
+            deletelike(pid);
         }
+    }
+
+    private void deletelike(String pid) {
+        Query query= FirebaseDatabase.getInstance().getReference("Likes").child(pid);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    dataSnapshot.getRef().removeValue();
+                Toast.makeText(context,"Deleted Sucessfully",Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void deltewithImage(final String pid, String image) {
@@ -305,6 +324,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
                       for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
                           dataSnapshot1.getRef().removeValue();
                       }
+
                       pd.dismiss();
                       Toast.makeText(context,"Deleted Sucessfully",Toast.LENGTH_LONG).show();
                     }
@@ -322,6 +342,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
             }
         });
     }
+
 
     private void deleteWithoutImage(String pid) {
         final ProgressDialog pd=new ProgressDialog(context);

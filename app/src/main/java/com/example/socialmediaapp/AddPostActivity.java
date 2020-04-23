@@ -96,6 +96,17 @@ public class AddPostActivity extends AppCompatActivity {
         pd = new ProgressDialog(this);
         pd.setCanceledOnTouchOutside(false);
         Intent intent = getIntent();
+        String action=intent.getAction();
+        String type=intent.getType();
+        if(Intent.ACTION_SEND.equals(action) && type!=null){
+            if("text/plain".equals(type)){
+
+                handlesendText(intent);
+            }
+            else if(type.startsWith("image")){
+                handlesendImage(intent);
+            }
+        }
         final String updatekey = "" + intent.getStringExtra("key");
         final String editpost = "" + intent.getStringExtra("editpostId");
         if (updatekey.equals("editpost")) {
@@ -158,6 +169,21 @@ public class AddPostActivity extends AppCompatActivity {
             }
         });
         actionBar.setSubtitle(email);
+    }
+
+    private void handlesendImage(Intent intent) {
+        Uri imageUri=(Uri)intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        if(imageUri!=null){
+            imageuri=imageUri;
+            image.setImageURI(imageuri);
+        }
+    }
+
+    private void handlesendText(Intent intent) {
+        String sharedText=intent.getStringExtra(Intent.EXTRA_TEXT);
+        if(sharedText!=null){
+            des.setText(sharedText);
+        }
     }
 
     private void beginupdate(String titl, String description, String editpost) {
@@ -498,7 +524,7 @@ public class AddPostActivity extends AppCompatActivity {
                                         try {
                                             prepareNotification(
                                                     ""+timestamp
-                                            ,""+name+" added new post ",
+                                            ,""+name+" Added new post ",
                                                     ""+titl+"\n"+description,
                                                     "POST_NOTIFICATION",
                                                     "POST");
@@ -557,7 +583,7 @@ public class AddPostActivity extends AppCompatActivity {
                                     prepareNotification(
                                             ""+timestamp
                                             ,""+name+" added new post ",
-                                            ""+titl+ "\n" + des ,
+                                            ""+titl+ " " ,
                                             "POST_NOTIFICATION","POST");
                                 } catch (JSONException e) {
                                     e.printStackTrace();
