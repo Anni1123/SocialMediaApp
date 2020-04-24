@@ -636,6 +636,7 @@ public class ProfileFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main_menu,menu);
         menu.findItem(R.id.craetegrp).setVisible(false);
+        menu.findItem(R.id.addparticipants).setVisible(false);
         MenuItem item=menu.findItem(R.id.search);
         SearchView searchView=(SearchView) MenuItemCompat.getActionView(item);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

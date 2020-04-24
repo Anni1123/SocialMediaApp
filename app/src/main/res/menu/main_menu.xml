@@ -34,4 +34,10 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_group"
         ></item>
+    <item
+        android:id="@+id/addparticipants"
+        android:title="Add Participants"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_addparticipants"
+        ></item>
 </menu>

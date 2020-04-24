@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -32,7 +34,7 @@ import java.util.HashMap;
 
 public class GroupChatActivity extends AppCompatActivity {
 
-    String grouid;
+    String grouid,mygrprole="";
     Toolbar toolbar;
     ImageView grpicon;
     ImageButton attachbtn,sendmsgbtn;
@@ -59,6 +61,7 @@ public class GroupChatActivity extends AppCompatActivity {
         grouid=intent.getStringExtra("groupid");
         firebaseAuth=FirebaseAuth.getInstance();
         loadGroupInfo();
+        setSupportActionBar(toolbar);
 
         sendmsgbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,11 +73,33 @@ public class GroupChatActivity extends AppCompatActivity {
                 }
                 else {
                     sendMessage(messag);
+                    message.setText("");
                 }
             }
         });
         loadMessage();
+        loadMygroupRole();
     }
+
+    private void loadMygroupRole() {
+        DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Groups");
+        reference.child(grouid).child("Participants").orderByChild("uid").equalTo(firebaseAuth.getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot ds:dataSnapshot.getChildren()){
+                            mygrprole=""+ds.child("role").getValue();
+                            invalidateOptionsMenu();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
     private void loadMessage(){
         groupChatsArrayList=new ArrayList<>();
         DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Groups");
@@ -147,6 +172,33 @@ public class GroupChatActivity extends AppCompatActivity {
                 Toast.makeText(GroupChatActivity.this,""+e.getMessage(),Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu,menu);
+        menu.findItem(R.id.settings).setVisible(false);
+        menu.findItem(R.id.craetegrp).setVisible(false);
+        menu.findItem(R.id.add).setVisible(false);
+        menu.findItem(R.id.logout).setVisible(false);
+
+        if(mygrprole.equals("creator")||mygrprole.equals("admin")){
+            menu.findItem(R.id.addparticipants).setVisible(true);
+        }
+        else {
+            menu.findItem(R.id.addparticipants).setVisible(false);
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId()==R.id.addparticipants){
+            Intent intent=new Intent(this,GroupParticipantsAddActivity.class);
+            intent.putExtra("groupId",grouid);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
 
