@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:background="#F1EDED"
     android:layout_height="match_parent"
-    tools:context=".ProfileFragment">
+    tools:context=".fragments.ProfileFragment">
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

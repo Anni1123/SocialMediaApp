@@ -1,4 +1,4 @@
-package com.example.socialmediaapp;
+package com.example.socialmediaapp.fragments;
 
 
 import android.os.Bundle;
@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.socialmediaapp.R;
 import com.example.socialmediaapp.adapters.AdapterNotification;
 import com.example.socialmediaapp.models.ModelNotifications;
 import com.example.socialmediaapp.notifications.Data;

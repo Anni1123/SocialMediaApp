@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    android:background="#eee"
+    tools:context=".CreateGroupActivity">
+
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/groupicon"
+        android:src="@drawable/ic_groups"/>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/grptitle"
+        android:background="@color/colorWhite"
+        android:layout_below="@id/groupicon"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        android:hint="Group Title"/>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/grpdesc"
+        android:background="@color/colorWhite"
+        android:layout_below="@id/grptitle"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        android:inputType="textMultiLine|textCapSentences"
+        android:minHeight="100dp"
+        android:gravity="top"
+        android:hint="Group Description"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/crtgrpbtbn"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/ic_done"/>
+</RelativeLayout>

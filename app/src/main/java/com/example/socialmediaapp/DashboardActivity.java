@@ -8,10 +8,17 @@ import androidx.fragment.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
+import android.widget.PopupMenu;
 
+import com.example.socialmediaapp.fragments.ChatListFragment;
+import com.example.socialmediaapp.fragments.GroupChatFragment;
+import com.example.socialmediaapp.fragments.HomeFragment;
+import com.example.socialmediaapp.fragments.NotificationsFragment;
+import com.example.socialmediaapp.fragments.ProfileFragment;
+import com.example.socialmediaapp.fragments.UsersFragment;
 import com.example.socialmediaapp.notifications.Token;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -20,14 +27,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 
-import java.util.HashMap;
-
 public class DashboardActivity extends AppCompatActivity  {
 
     private FirebaseAuth firebaseAuth;
     FirebaseUser firebaseUser;
     String myuid;
     ActionBar actionBar;
+    BottomNavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +43,7 @@ public class DashboardActivity extends AppCompatActivity  {
         actionBar.setTitle("Profile Activity");
         firebaseAuth=FirebaseAuth.getInstance();
 
-        BottomNavigationView navigationView=findViewById(R.id.navigation);
+        navigationView=findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(selectedListener);
         actionBar.setTitle("Home");
         HomeFragment fragment=new HomeFragment();
@@ -92,17 +98,40 @@ public class DashboardActivity extends AppCompatActivity  {
                     fragmentTransaction3.replace(R.id.content,listFragment,"");
                     fragmentTransaction3.commit();
                     return true;
-                case R.id.nav_notifications:
-                    actionBar.setTitle("Notifications");
-                    NotificationsFragment notificationsFragment=new NotificationsFragment();
-                    FragmentTransaction fragmentTransaction4=getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction4.replace(R.id.content,notificationsFragment,"");
-                    fragmentTransaction4.commit();
-                    return true;
+                case R.id.nav_more:
+                    showMoreOptions();
             }
             return false;
         }
     };
+
+    private void showMoreOptions() {
+        PopupMenu menu=new PopupMenu(this,navigationView, Gravity.END);
+        menu.getMenu().add(Menu.NONE,0,0,"Notifications");
+        menu.getMenu().add(Menu.NONE,1,0,"Group Chats");
+        menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                int id=item.getItemId();
+                if(id==0){
+                    actionBar.setTitle("Chats");
+                    NotificationsFragment notificationsFragment=new NotificationsFragment();
+                    FragmentTransaction fragmentTransactiona=getSupportFragmentManager().beginTransaction();
+                    fragmentTransactiona.replace(R.id.content,notificationsFragment,"");
+                    fragmentTransactiona.commit();
+                }
+                if(id==1){
+                    actionBar.setTitle("Chats");
+                    GroupChatFragment groupChatFragment=new GroupChatFragment();
+                    FragmentTransaction fragmentTransactionb=getSupportFragmentManager().beginTransaction();
+                    fragmentTransactionb.replace(R.id.content,groupChatFragment,"");
+                    fragmentTransactionb.commit();
+                }
+                return false;
+            }
+        });
+        menu.show();
+    }
 
     @Override
     protected void onStart() {

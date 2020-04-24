@@ -28,4 +28,10 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_add"
         ></item>
+    <item
+        android:id="@+id/craetegrp"
+        android:title="Group"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_group"
+        ></item>
 </menu>

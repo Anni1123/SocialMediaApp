@@ -1,4 +1,4 @@
-package com.example.socialmediaapp;
+package com.example.socialmediaapp.fragments;
 
 
 import android.content.Intent;
@@ -22,6 +22,10 @@ import android.view.ViewGroup;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.example.socialmediaapp.AddPostActivity;
+import com.example.socialmediaapp.MainActivity;
+import com.example.socialmediaapp.R;
+import com.example.socialmediaapp.SettingsActivity;
 import com.example.socialmediaapp.adapters.AdapterPosts;
 import com.example.socialmediaapp.models.ModelPost;
 import com.google.firebase.auth.FirebaseAuth;
@@ -129,6 +133,7 @@ AdapterPosts adapterPosts;
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main_menu,menu);
+        menu.findItem(R.id.craetegrp).setVisible(false);
         MenuItem item=menu.findItem(R.id.search);
         SearchView searchView=(SearchView) MenuItemCompat.getActionView(item);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -166,10 +171,10 @@ AdapterPosts adapterPosts;
 
         }
         else if(item.getItemId()==R.id.add){
-            startActivity(new Intent(getActivity(),AddPostActivity.class));
+            startActivity(new Intent(getActivity(), AddPostActivity.class));
         }
         else if(item.getItemId()==R.id.settings){
-            startActivity(new Intent(getActivity(),SettingsActivity.class));
+            startActivity(new Intent(getActivity(), SettingsActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }
@@ -179,7 +184,7 @@ AdapterPosts adapterPosts;
 
         }
         else {
-            startActivity(new Intent(getActivity(),MainActivity.class));
+            startActivity(new Intent(getActivity(), MainActivity.class));
             getActivity().finish();
         }
     }

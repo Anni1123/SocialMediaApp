@@ -1,4 +1,4 @@
-package com.example.socialmediaapp;
+package com.example.socialmediaapp.fragments;
 
 
 import android.Manifest;
@@ -30,6 +30,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -37,12 +38,18 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.socialmediaapp.AddPostActivity;
+import com.example.socialmediaapp.MainActivity;
+import com.example.socialmediaapp.R;
+import com.example.socialmediaapp.SettingsActivity;
 import com.example.socialmediaapp.adapters.AdapterPosts;
 import com.example.socialmediaapp.models.ModelPost;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -240,7 +247,7 @@ public class ProfileFragment extends Fragment {
         requestPermissions(cameraPermission,CAMERA_REQUEST);
     }
     private void showEditProfileDialog() {
-        String options[]={"Edit Profile Picture","Edit Name", "Edit Phone","Edit Cover Photo"};
+        String options[]={"Edit Profile Picture","Edit Name", "Edit Phone","Edit Cover Photo","Change Password"};
         AlertDialog.Builder builder=new AlertDialog.Builder(getActivity());
         builder.setTitle("Choose Action");
         builder.setItems(options, new DialogInterface.OnClickListener() {
@@ -262,11 +269,76 @@ public class ProfileFragment extends Fragment {
                     pd.setMessage("Updating Cover Pic");
                     profileOrCoverPhoto="cover";
                     showImagePicDialog();
-
+                }
+                else if (which==4){
+                    pd.setMessage("Changing Password");
+                    showPasswordChangeDailog();
                 }
             }
         });
         builder.create().show();
+    }
+
+    private void showPasswordChangeDailog() {
+        View view=LayoutInflater.from(getActivity()).inflate(R.layout.dialog_update_password,null);
+        final EditText oldpass=view.findViewById(R.id.oldpasslog);
+        final EditText newpass=view.findViewById(R.id.newpasslog);
+        Button editpass=view.findViewById(R.id.updatepass);
+        AlertDialog.Builder builder=new AlertDialog.Builder(getActivity());
+        builder.setView(view);
+        final AlertDialog dialog=builder.create();
+        dialog.show();
+        editpass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String oldp=oldpass.getText().toString().trim();
+                String newp=newpass.getText().toString().trim();
+                if(TextUtils.isEmpty(oldp)){
+                    Toast.makeText(getActivity(),"Current Password cant be empty",Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if(TextUtils.isEmpty(newp)){
+                    Toast.makeText(getActivity(),"New Password cant be empty",Toast.LENGTH_LONG).show();
+                    return;
+                }
+                dialog.dismiss();
+                updatePassword(oldp,newp);
+            }
+        });
+    }
+
+    private void updatePassword(String oldp, final String newp) {
+        pd.show();
+        final FirebaseUser user=firebaseAuth.getCurrentUser();
+        AuthCredential authCredential= EmailAuthProvider.getCredential(user.getEmail(),oldp);
+        user.reauthenticate(authCredential)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                       user.updatePassword(newp)
+                               .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                   @Override
+                                   public void onSuccess(Void aVoid) {
+                                       pd.dismiss();
+                                       Toast.makeText(getActivity(),"Changed Password",Toast.LENGTH_LONG).show();
+
+                                   }
+                               }).addOnFailureListener(new OnFailureListener() {
+                           @Override
+                           public void onFailure(@NonNull Exception e) {
+                               pd.dismiss();
+                               Toast.makeText(getActivity(),"Failed",Toast.LENGTH_LONG).show();
+                           }
+                       });
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                pd.dismiss();
+                Toast.makeText(getActivity(),"Failed",Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     private void showNamephoneupdate(final String key) {
@@ -563,6 +635,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main_menu,menu);
+        menu.findItem(R.id.craetegrp).setVisible(false);
         MenuItem item=menu.findItem(R.id.search);
         SearchView searchView=(SearchView) MenuItemCompat.getActionView(item);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -599,10 +672,10 @@ public class ProfileFragment extends Fragment {
             checkUserStatus();
         }
         else if(item.getItemId()==R.id.add){
-            startActivity(new Intent(getActivity(),AddPostActivity.class));
+            startActivity(new Intent(getActivity(), AddPostActivity.class));
         }
         else if(item.getItemId()==R.id.settings){
-            startActivity(new Intent(getActivity(),SettingsActivity.class));
+            startActivity(new Intent(getActivity(), SettingsActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }
@@ -612,7 +685,7 @@ public class ProfileFragment extends Fragment {
             uid=user.getUid();
         }
         else {
-            startActivity(new Intent(getActivity(),MainActivity.class));
+            startActivity(new Intent(getActivity(), MainActivity.class));
             getActivity().finish();
         }
     }

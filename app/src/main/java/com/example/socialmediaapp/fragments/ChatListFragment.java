@@ -1,4 +1,4 @@
-package com.example.socialmediaapp;
+package com.example.socialmediaapp.fragments;
 
 
 import android.content.Intent;
@@ -19,6 +19,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
 
+import com.example.socialmediaapp.CreateGroupActivity;
+import com.example.socialmediaapp.MainActivity;
+import com.example.socialmediaapp.R;
+import com.example.socialmediaapp.SettingsActivity;
 import com.example.socialmediaapp.adapters.AdapterChatList;
 import com.example.socialmediaapp.models.ModelChat;
 import com.example.socialmediaapp.models.ModelChatList;
@@ -185,7 +189,10 @@ public class ChatListFragment extends Fragment {
             checkUserStatus();
         }
         else if(item.getItemId()==R.id.settings){
-            startActivity(new Intent(getActivity(),SettingsActivity.class));
+            startActivity(new Intent(getActivity(), SettingsActivity.class));
+        }
+        else if(item.getItemId()==R.id.craetegrp){
+            startActivity(new Intent(getActivity(), CreateGroupActivity.class));
         }
 
         return super.onOptionsItemSelected(item);
@@ -196,7 +203,7 @@ public class ChatListFragment extends Fragment {
 
         }
         else {
-            startActivity(new Intent(getActivity(),MainActivity.class));
+            startActivity(new Intent(getActivity(), MainActivity.class));
             getActivity().finish();
         }
     }
