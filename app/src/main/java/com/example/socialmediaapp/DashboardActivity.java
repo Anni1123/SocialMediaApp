@@ -92,6 +92,13 @@ public class DashboardActivity extends AppCompatActivity  {
                     fragmentTransaction3.replace(R.id.content,listFragment,"");
                     fragmentTransaction3.commit();
                     return true;
+                case R.id.nav_notifications:
+                    actionBar.setTitle("Notifications");
+                    NotificationsFragment notificationsFragment=new NotificationsFragment();
+                    FragmentTransaction fragmentTransaction4=getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction4.replace(R.id.content,notificationsFragment,"");
+                    fragmentTransaction4.commit();
+                    return true;
             }
             return false;
         }

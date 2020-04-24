@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.socialmediaapp.AddPostActivity;
 import com.example.socialmediaapp.PostDetailsActivity;
+import com.example.socialmediaapp.PostLikedByActivity;
 import com.example.socialmediaapp.R;
 import com.example.socialmediaapp.ThereProfileActivity;
 import com.example.socialmediaapp.models.ModelPost;
@@ -46,6 +47,7 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -87,6 +89,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
         final String image=modelPosts.get(position).getUimage();
         String email=modelPosts.get(position).getUemail();
         String comm=modelPosts.get(position).getPcomments();
+        final String pid=modelPosts.get(position).getPid();
         Calendar calendar=Calendar.getInstance(Locale.ENGLISH);
         calendar.setTimeInMillis(Long.parseLong(ptime));
         String timedate= DateFormat.format("dd/MM/yyyy hh:mm aa",calendar).toString();
@@ -144,6 +147,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
                                 postref.child(postid).child("plike").setValue(""+(plike+1));
                                 liekeref.child(postid).child(myuid).setValue("Liked");
                                 mprocesslike=false;
+                                addToHisNotification(""+uid,""+postid,"Liked Your Post");
                             }
                         }
                     }
@@ -181,6 +185,14 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
             public void onClick(View v) {
                 Intent intent=new Intent(context, ThereProfileActivity.class);
                 intent.putExtra("uid", uid);
+                context.startActivity(intent);
+            }
+        });
+        holder.like.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(context, PostLikedByActivity.class);
+                intent.putExtra("pid",ptime);
                 context.startActivity(intent);
             }
         });
@@ -225,8 +237,29 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder>{
         return uri;
     }
 
+    private void addToHisNotification(String hisUid,String pid,String notification){
+        String timestamp=""+System.currentTimeMillis();
+        HashMap<Object,String> hashMap=new HashMap<>();
+        hashMap.put("pid",pid);
+        hashMap.put("timestamp",timestamp);
+        hashMap.put("puid",hisUid);
+        hashMap.put("notification",notification);
+        hashMap.put("suid",myuid);
+        DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Users");
+        reference.child(hisUid).child("Notifications").child(timestamp).setValue(hashMap)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
 
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
 
+            }
+        });
+
+    }
     private void setLikes(final MyHolder holder,final String pid) {
         liekeref.addValueEventListener(new ValueEventListener() {
             @Override

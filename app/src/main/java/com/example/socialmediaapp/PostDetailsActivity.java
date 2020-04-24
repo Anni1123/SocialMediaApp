@@ -56,7 +56,7 @@ import java.util.Locale;
 public class PostDetailsActivity extends AppCompatActivity {
 
 
-    String ptime,myuid,myname,myemail,mydp,uimage,
+    String hisuid,ptime,myuid,myname,myemail,mydp,uimage,
     postId,plike,hisdp,hisname;
     ImageView picture,image;
     TextView name,time,title,description,like,tcomment;
@@ -82,6 +82,7 @@ public class PostDetailsActivity extends AppCompatActivity {
         actionBar.setDisplayShowHomeEnabled(true);
         postId=getIntent().getStringExtra("pid");
         recyclerView=findViewById(R.id.recyclecomment);
+        checkUserStatus();
         picture=findViewById(R.id.pictureco);
         image=findViewById(R.id.pimagetvco);
         name=findViewById(R.id.unameco);
@@ -99,7 +100,7 @@ public class PostDetailsActivity extends AppCompatActivity {
         profile=findViewById(R.id.profilelayout);
         progressDialog=new ProgressDialog(this);
         loadPostInfo();
-        checkUserStatus();
+
         loadUserInfo();
         setLikes();
         actionBar.setSubtitle("SignedInAs:" +myemail);
@@ -137,7 +138,26 @@ public class PostDetailsActivity extends AppCompatActivity {
                 }
             }
         });
+        like.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(PostDetailsActivity.this, PostLikedByActivity.class);
+                intent.putExtra("pid",postId);
+                startActivity(intent);
+            }
+        });
+    }
+    private void checkUserStatus(){
+        FirebaseUser user= FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null){
 
+            myemail=user.getEmail();
+            myuid=user.getUid();
+        }
+        else {
+            startActivity(new Intent(PostDetailsActivity.this,MainActivity.class));
+            finish();
+        }
     }
     private void shareTextOnly(String titlee, String descri) {
 
@@ -159,7 +179,29 @@ public class PostDetailsActivity extends AppCompatActivity {
         intent.setType("image/png");
         startActivity(Intent.createChooser(intent,"Share Via"));
     }
+    private void addToHisNotification(String hisUid,String pid,String notification){
+        String timestamp=""+System.currentTimeMillis();
+        HashMap<Object,String> hashMap=new HashMap<>();
+        hashMap.put("pid",pid);
+        hashMap.put("timestamp",timestamp);
+        hashMap.put("puid",hisUid);
+        hashMap.put("notification",notification);
+        hashMap.put("suid",myuid);
+        DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Users");
+        reference.child(hisUid).child("Notifications").child(timestamp).setValue(hashMap)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
 
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+
+    }
     private Uri saveImageToShare(Bitmap bitmap) {
         File imagefolder=new File(getCacheDir(),"images");
         Uri uri=null;
@@ -335,6 +377,7 @@ public class PostDetailsActivity extends AppCompatActivity {
                         postref.child(postId).child("plike").setValue(""+(Integer.parseInt(plike)+1));
                         liekeref.child(postId).child(myuid).setValue("Liked");
                         mlike=false;
+                        addToHisNotification(""+hisuid,""+myuid,"Liked Your Post");
                     }
                 }
             }
@@ -370,6 +413,7 @@ public class PostDetailsActivity extends AppCompatActivity {
             public void onSuccess(Void aVoid) {
                 progressDialog.dismiss();
                 Toast.makeText(PostDetailsActivity.this,"Added",Toast.LENGTH_LONG).show();
+                addToHisNotification(""+hisuid,""+myuid,"Commented On Your Post");
                 comment.setText("");
                 updatecommetcount();
             }
@@ -443,6 +487,7 @@ public class PostDetailsActivity extends AppCompatActivity {
                     String descriptions=dataSnapshot1.child("description").getValue().toString();
                   uimage=dataSnapshot1.child("uimage").getValue().toString();
                     hisdp=dataSnapshot1.child("udp").getValue().toString();
+                    hisuid=dataSnapshot1.child("uid").getValue().toString();
                     String uemail=dataSnapshot1.child("uemail").getValue().toString();
                     hisname=dataSnapshot1.child("uname").getValue().toString();
                     ptime=dataSnapshot1.child("ptime").getValue().toString();
@@ -487,18 +532,6 @@ public class PostDetailsActivity extends AppCompatActivity {
         });
     }
 
-    private void checkUserStatus(){
-        FirebaseUser user= FirebaseAuth.getInstance().getCurrentUser();
-        if(user!=null){
-
-            myemail=user.getEmail();
-            myuid=user.getUid();
-        }
-        else {
-            startActivity(new Intent(PostDetailsActivity.this,MainActivity.class));
-            finish();
-        }
-    }
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
