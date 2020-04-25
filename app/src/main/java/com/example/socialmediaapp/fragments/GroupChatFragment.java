@@ -119,6 +119,7 @@ public class GroupChatFragment extends Fragment {
         menu.findItem(R.id.add).setVisible(false);
         menu.findItem(R.id.settings).setVisible(false);
         menu.findItem(R.id.addparticipants).setVisible(false);
+        menu.findItem(R.id.grpinfo).setVisible(false);
         MenuItem item=menu.findItem(R.id.search);
 
         SearchView searchView=(SearchView) MenuItemCompat.getActionView(item);

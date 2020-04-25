@@ -40,4 +40,10 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_addparticipants"
         ></item>
+    <item
+        android:id="@+id/grpinfo"
+        android:title="Group Info"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_info"
+        ></item>
 </menu>

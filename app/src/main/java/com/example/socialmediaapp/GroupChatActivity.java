@@ -390,6 +390,11 @@ public class GroupChatActivity extends AppCompatActivity {
             intent.putExtra("groupId",grouid);
             startActivity(intent);
         }
+        if(item.getItemId()==R.id.grpinfo){
+            Intent intent=new Intent(this,GroupInfoActivity.class);
+            intent.putExtra("groupId",grouid);
+            startActivity(intent);
+        }
         return super.onOptionsItemSelected(item);
     }
 }

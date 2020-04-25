@@ -176,6 +176,7 @@ public class ChatListFragment extends Fragment {
         inflater.inflate(R.menu.main_menu,menu);
         menu.findItem(R.id.add).setVisible(false);
         menu.findItem(R.id.addparticipants).setVisible(false);
+        menu.findItem(R.id.grpinfo).setVisible(false);
 
         super.onCreateOptionsMenu(menu,inflater);
     }

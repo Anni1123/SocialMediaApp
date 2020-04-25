@@ -15,7 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".GroupParticipantsAddActivity"></activity>
+        <activity android:name=".GroupEditActivity"></activity>
+        <activity android:name=".GroupInfoActivity" />
+        <activity android:name=".GroupParticipantsAddActivity" />
         <activity
             android:name=".GroupChatActivity"
             android:theme="@style/AppThemeNo" />

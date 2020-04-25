@@ -42,6 +42,7 @@
             android:layout_marginStart="5dp"
             android:text="Text Message"
             android:id="@+id/sendingmsg"
+            android:maxLines="2"
             android:layout_toEndOf="@id/sendername"
             android:layout_below="@id/grptitletv"
             android:textColor="#666262"

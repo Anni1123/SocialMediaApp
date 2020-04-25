@@ -552,6 +552,7 @@ public class PostDetailsActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main_menu,menu);
         menu.findItem(R.id.search).setVisible(false);
         menu.findItem(R.id.add).setVisible(false);
+        menu.findItem(R.id.grpinfo).setVisible(false);
         return super.onCreateOptionsMenu(menu);
     }
 }

@@ -69,7 +69,6 @@ public class AdapterParticipantsAd extends RecyclerView.Adapter<AdapterParticipa
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context,"Done",Toast.LENGTH_LONG).show();
                 DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Groups");
                 reference.child(groupid).child("Participants").child(uid)
                         .addListenerForSingleValueEvent(new ValueEventListener() {
