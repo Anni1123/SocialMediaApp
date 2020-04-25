@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.socialmediaapp.ChatActivity;
 import com.example.socialmediaapp.R;
+import com.example.socialmediaapp.models.ModelChat;
 import com.example.socialmediaapp.models.ModelUsers;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -74,7 +75,7 @@ public class AdapterChatList extends RecyclerView.Adapter<AdapterChatList.Myhold
 
         }
         if(usersList.get(position).getOnlineStatus().equals("online")){
-            holder.status.setImageResource(R.drawable.circle_online);
+            holder.status.setImageResource(R.drawable.online);
         }
         else {
             holder.status.setImageResource(R.drawable.circle_offline);
@@ -98,6 +99,7 @@ public class AdapterChatList extends RecyclerView.Adapter<AdapterChatList.Myhold
             }
         });
     }
+
     private void checkisBlocked(String hisuid, final Myholder holder, final int position) {
         DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
         reference.child(firebaseAuth.getUid()).child("BlockUsers").orderByChild("uid").equalTo(hisuid)
@@ -201,7 +203,7 @@ public class AdapterChatList extends RecyclerView.Adapter<AdapterChatList.Myhold
     }
 
     class Myholder extends RecyclerView.ViewHolder{
-        ImageView profile,status,block;
+        ImageView profile,status,block,seen;
         TextView name,lastmessage;
         public Myholder(@NonNull View itemView) {
             super(itemView);
@@ -210,7 +212,7 @@ public class AdapterChatList extends RecyclerView.Adapter<AdapterChatList.Myhold
             name=itemView.findViewById(R.id.nameonline);
             lastmessage=itemView.findViewById(R.id.lastmessge);
             block=itemView.findViewById(R.id.blocking);
-
+            seen=itemView.findViewById(R.id.seen);
         }
     }
 }

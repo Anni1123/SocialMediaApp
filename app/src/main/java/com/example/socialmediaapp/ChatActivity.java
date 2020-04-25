@@ -722,6 +722,8 @@ public class ChatActivity extends AppCompatActivity {
         menu.findItem(R.id.search).setVisible(false);
         menu.findItem(R.id.craetegrp).setVisible(false);
         menu.findItem(R.id.add).setVisible(false);
+        menu.findItem(R.id.addparticipants).setVisible(false);
+        menu.findItem(R.id.grpinfo).setVisible(false);
         return super.onCreateOptionsMenu(menu);
     }
 

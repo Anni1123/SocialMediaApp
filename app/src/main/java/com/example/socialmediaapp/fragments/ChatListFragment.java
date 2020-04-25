@@ -52,8 +52,7 @@ public class ChatListFragment extends Fragment {
     DatabaseReference reference;
     FirebaseUser firebaseUser;
     AdapterChatList adapterChatList;
-
-
+    List<ModelChat> chatList;
     public ChatListFragment() {
         // Required empty public constructor
     }
@@ -69,6 +68,7 @@ public class ChatListFragment extends Fragment {
 
         recyclerView=view.findViewById(R.id.chatlistrecycle);
         chatListList=new ArrayList<>();
+        chatList=new ArrayList<>();
         reference= FirebaseDatabase.getInstance().getReference("ChatList").child(firebaseUser.getUid());
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -175,6 +175,10 @@ public class ChatListFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main_menu,menu);
         menu.findItem(R.id.add).setVisible(false);
+        menu.findItem(R.id.search).setVisible(false);
+        menu.findItem(R.id.logout).setVisible(false);
+        menu.findItem(R.id.settings).setVisible(false);
+        menu.findItem(R.id.search).setVisible(false);
         menu.findItem(R.id.addparticipants).setVisible(false);
         menu.findItem(R.id.grpinfo).setVisible(false);
 
