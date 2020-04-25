@@ -5,6 +5,7 @@ import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,6 +20,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -59,12 +61,23 @@ public class AdapterGroupChat extends RecyclerView.Adapter<AdapterGroupChat.Myho
         String message=chats.getMessage();
         String sender=chats.getSender();
         String timestamp=chats.getTimestamp();
+        String type=chats.getType();
         Calendar calendar=Calendar.getInstance(Locale.ENGLISH);
         calendar.setTimeInMillis(Long.parseLong(timestamp));
         String timedate= DateFormat.format("dd/MM/yyyy hh:mm aa",calendar).toString();
-        holder.message.setText(message);
+
         setUserName(chats,holder);
         holder.time.setText(timedate);
+        if(type.equals("text")){
+            holder.message.setVisibility(View.VISIBLE);
+            holder.image.setVisibility(View.GONE);
+            holder.message.setText(message);
+        }
+        else {
+            holder.message.setVisibility(View.GONE);
+            holder.image.setVisibility(View.VISIBLE);
+            Picasso.with(context).load(message).into(holder.image);
+        }
     }
 
     @Override
@@ -102,9 +115,11 @@ public class AdapterGroupChat extends RecyclerView.Adapter<AdapterGroupChat.Myho
     class Myholder extends RecyclerView.ViewHolder{
 
         TextView name,message,time;
+        ImageView image;
         public Myholder(@NonNull View itemView) {
             super(itemView);
             name=itemView.findViewById(R.id.sedername);
+            image=itemView.findViewById(R.id.imagegrp);
             message=itemView.findViewById(R.id.sendermsg);
             time=itemView.findViewById(R.id.timegrp);
         }

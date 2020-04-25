@@ -74,7 +74,7 @@ public class AdapterGroupChatList extends RecyclerView.Adapter<AdapterGroupChatL
 
     private void loadlastmessage(ModelGroupChatList modelGroupChat, final MyHolder holder) {
         DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Groups");
-        reference.child(modelGroupChat.getGrpId()).child("Messages").limitToFirst(1)
+        reference.child(modelGroupChat.getGrpId()).child("Messages").limitToLast(1)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -82,10 +82,16 @@ public class AdapterGroupChatList extends RecyclerView.Adapter<AdapterGroupChatL
                              String message=""+ds.child("message").getValue();
                              String sender=""+ds.child("sender").getValue();
                              String timestamp=""+ds.child("timestamp").getValue();
+                             String type=""+ds.child("type").getValue();
                              Calendar calendar=Calendar.getInstance(Locale.ENGLISH);
                              calendar.setTimeInMillis(Long.parseLong(timestamp));
                              String timedate= DateFormat.format("dd/MM/yyyy hh:mm aa",calendar).toString();
-                             holder.msg.setText(message);
+                             if(type.equals("text")){
+                                 holder.msg.setText(message);
+                             }
+                             else{
+                                 holder.msg.setText("Sent a Photo");
+                             }
                              holder.time.setText(timedate);
                              DatabaseReference reference1=FirebaseDatabase.getInstance().getReference("Users");
                              reference1.orderByChild("uid").equalTo(sender).addValueEventListener(new ValueEventListener() {

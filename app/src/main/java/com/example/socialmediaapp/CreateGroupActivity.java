@@ -107,7 +107,7 @@ public class CreateGroupActivity extends AppCompatActivity {
                     "");
         }
         else {
-            String filepathname="GroupImages"+ "" + "Img" + timestamp;
+            String filepathname="GroupProfileImages/"+ "Img" + timestamp;
             StorageReference storageReference1= FirebaseStorage.getInstance().getReference(filepathname);
             storageReference1.putFile(imageuri)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
