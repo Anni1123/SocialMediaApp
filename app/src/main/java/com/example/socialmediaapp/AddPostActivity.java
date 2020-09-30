@@ -152,11 +152,11 @@ public class AddPostActivity extends AppCompatActivity {
                 String titl = ""+title.getText().toString().trim();
                 String description = ""+des.getText().toString().trim();
                 if (TextUtils.isEmpty(titl)) {
-                    Toast.makeText(AddPostActivity.this, "Title cant be empty", Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddPostActivity.this, "Title can't be left empty", Toast.LENGTH_LONG).show();
                     return;
                 }
                 if (TextUtils.isEmpty(description)) {
-                    Toast.makeText(AddPostActivity.this, "Description cant be empty", Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddPostActivity.this, "Description can't be left empty", Toast.LENGTH_LONG).show();
                     return;
                 }
                 if (updatekey.equals("editpost")) {
