@@ -231,7 +231,7 @@ public class AddPostActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
                 pd.dismiss();
-                Toast.makeText(AddPostActivity.this, "Failed", Toast.LENGTH_LONG).show();
+                Toast.makeText(AddPostActivity.this, "Failed ", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -623,6 +623,7 @@ public class AddPostActivity extends AppCompatActivity {
                     }
                 }
             }
+                //function end
             break;
             case STORAGE_REQUEST:{
                 if(grantResults.length>0){
