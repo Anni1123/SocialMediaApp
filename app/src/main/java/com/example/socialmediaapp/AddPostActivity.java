@@ -69,7 +69,7 @@ public class AddPostActivity extends AppCompatActivity {
     String cameraPermission[];
     String storagePermission[];
     ProgressDialog pd;
-    ImageView image;
+    ImageView image,image2;
     String edititle, editdes, editimage;
     private static final int IMAGEPICK_GALLERY_REQUEST = 300;
     private static final int IMAGE_PICKCAMERA_REQUEST = 400;
