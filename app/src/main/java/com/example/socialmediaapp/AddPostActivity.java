@@ -69,7 +69,7 @@ public class AddPostActivity extends AppCompatActivity {
     String cameraPermission[];
     String storagePermission[];
     ProgressDialog pd;
-    ImageView image,image2;
+    ImageView image;
     String edititle, editdes, editimage;
     private static final int IMAGEPICK_GALLERY_REQUEST = 300;
     private static final int IMAGE_PICKCAMERA_REQUEST = 400;
@@ -299,7 +299,7 @@ public class AddPostActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Void aVoid) {
                 final String timestamp = String.valueOf(System.currentTimeMillis());
-                String filepathname = "Posts/" + "post" + timestamp;
+                String filepathname = "Posts/" + "posts" + timestamp;
                 Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
