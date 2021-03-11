@@ -28,9 +28,9 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import com.example.socialmediaapp.adapters.AdapterComment;
 import com.example.socialmediaapp.models.ModelComment;
-import com.example.socialmediaapp.notifications.Data;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
